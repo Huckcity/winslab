@@ -8,14 +8,14 @@ import './CueRow.css'
 
 
 const COLOR_MAP: Record<CueColor, string> = {
-  none: 'transparent',
-  red: '#c0392b',
-  orange: '#e67e22',
-  yellow: '#f1c40f',
-  green: '#27ae60',
-  blue: '#2980b9',
-  purple: '#8e44ad',
-  pink: '#e91e8c'
+  none:   'var(--cue-color-none)',
+  red:    'var(--cue-color-red)',
+  orange: 'var(--cue-color-orange)',
+  yellow: 'var(--cue-color-yellow)',
+  green:  'var(--cue-color-green)',
+  blue:   'var(--cue-color-blue)',
+  purple: 'var(--cue-color-purple)',
+  pink:   'var(--cue-color-pink)',
 }
 
 const TYPE_ICON: Record<string, string> = {

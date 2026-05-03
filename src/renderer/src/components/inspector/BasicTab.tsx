@@ -2,9 +2,15 @@ import { useStore } from '../../store'
 import type { Cue, CueColor } from '../../types/cue'
 
 const COLORS: CueColor[] = ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink']
-const COLOR_HEX: Record<CueColor, string> = {
-  none: '#444', red: '#c0392b', orange: '#e67e22', yellow: '#f1c40f',
-  green: '#27ae60', blue: '#2980b9', purple: '#8e44ad', pink: '#e91e8c'
+const COLOR_VAR: Record<CueColor, string> = {
+  none:   'var(--border-input)',
+  red:    'var(--cue-color-red)',
+  orange: 'var(--cue-color-orange)',
+  yellow: 'var(--cue-color-yellow)',
+  green:  'var(--cue-color-green)',
+  blue:   'var(--cue-color-blue)',
+  purple: 'var(--cue-color-purple)',
+  pink:   'var(--cue-color-pink)',
 }
 
 interface Props { cue: Cue }
@@ -32,8 +38,8 @@ export function BasicTab({ cue }: Props) {
               title={c}
               onClick={() => set({ colorLabel: c })}
               style={{
-                width: 18, height: 18, borderRadius: 3,
-                background: COLOR_HEX[c],
+                width: 18, height: 18, borderRadius: 'var(--radius-md)',
+                background: COLOR_VAR[c],
                 border: cue.colorLabel === c ? '2px solid #fff' : '2px solid transparent',
                 cursor: 'pointer'
               }}

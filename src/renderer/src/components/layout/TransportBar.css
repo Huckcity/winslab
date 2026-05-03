@@ -2,10 +2,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 52px;
-  padding: 0 16px;
-  background: #1a1a1a;
-  border-top: 1px solid #333;
+  height: var(--h-transport);
+  padding: 0 var(--space-4);
+  background: var(--bg-raised);
+  border-top: 1px solid var(--border);
   flex-shrink: 0;
 }
 
@@ -16,68 +16,69 @@
 
 .transport-right {
   text-align: right;
-  font-size: 12px;
-  color: #888;
+  font-size: var(--text-base);
+  color: var(--fg-muted);
 }
 
 .transport-right strong {
-  color: #ccc;
+  color: var(--fg-body);
 }
 
 .transport-center {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: center;
 }
 
 .btn-go,
 .btn-stop,
 .btn-panic {
-  height: 36px;
-  padding: 0 20px;
+  height: var(--h-button-lg);
+  padding: 0 var(--space-5);
   border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-lg);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-brand);
   cursor: pointer;
-  transition: opacity 0.1s;
+  font-family: inherit;
+  transition: var(--transition-std);
 }
 
 .btn-go {
-  background: #2d7a2d;
+  background: var(--state-go);
   color: #fff;
   min-width: 90px;
 }
 
-.btn-go:hover { background: #39a039; }
-.btn-go:active { background: #1e5a1e; }
+.btn-go:hover  { background: var(--state-go-hover); }
+.btn-go:active { background: var(--state-go-active); }
 
 .btn-stop {
-  background: #444;
-  color: #ccc;
+  background: var(--state-stop);
+  color: var(--fg-body);
 }
 
-.btn-stop:hover { background: #555; }
-.btn-stop:active { background: #333; }
+.btn-stop:hover  { background: var(--state-stop-hover); }
+.btn-stop:active { background: var(--state-stop-active); }
 
 .btn-panic {
-  background: #7a2d2d;
+  background: var(--state-panic);
   color: #fff;
 }
 
-.btn-panic:hover { background: #a03939; }
-.btn-panic:active { background: #5a1e1e; }
+.btn-panic:hover  { background: var(--state-panic-hover); }
+.btn-panic:active { background: var(--state-panic-active); }
 
 .running-badge {
-  font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 10px;
-  background: #2a2a2a;
-  color: #666;
+  font-size: var(--text-sm);
+  padding: 3px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--bg-input);
+  color: var(--fg-dim);
 }
 
 .running-badge[data-active='true'] {
-  background: #1e4a1e;
-  color: #5aaa5a;
+  background: var(--state-running-bg);
+  color: var(--state-running-fg);
 }

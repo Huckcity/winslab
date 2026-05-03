@@ -64,7 +64,7 @@ export function AudioInspector({ cue, tab }: Props) {
           <label>Loop count</label>
           <input type="number" min={-1} value={cue.loopCount}
             onChange={e => set({ loopCount: Number(e.target.value) })} />
-          <span style={{ fontSize: 11, color: '#666' }}>-1 = infinite</span>
+          <span className="inspector-hint" style={{ marginTop: 0 }}>-1 = infinite</span>
         </div>
       </div>
     )
@@ -78,26 +78,22 @@ export function AudioInspector({ cue, tab }: Props) {
           placeholder={loading ? 'Detecting duration…' : 'No file selected'}
           style={{ flex: 1, cursor: 'pointer', opacity: loading ? 0.6 : 1 }}
           onClick={pickFile} />
-        <button onClick={pickFile} disabled={loading} style={{ marginLeft: 4, padding: '0 8px', height: 26,
-          background: '#333', border: '1px solid #555', borderRadius: 3, color: '#ccc',
-          cursor: 'pointer', fontSize: 11 }}>Browse</button>
+        <button onClick={pickFile} disabled={loading} className="inspector-btn">Browse</button>
       </div>
       <div className="field-section-title">Output</div>
       <div className="field-row">
         <label>Volume</label>
         <input type="range" min={0} max={1} step={0.01} value={output.volume}
           onChange={e => setOutput({ volume: Number(e.target.value) })}
-          style={{ flex: 1 }} />
-        <span style={{ width: 36, textAlign: 'right', fontSize: 11, color: '#888' }}>
-          {Math.round(output.volume * 100)}%
-        </span>
+          style={{ flex: 1, accentColor: 'var(--accent-blue)' }} />
+        <span className="inspector-readout">{Math.round(output.volume * 100)}%</span>
       </div>
       <div className="field-row">
         <label>Pan</label>
         <input type="range" min={-1} max={1} step={0.01} value={output.pan}
           onChange={e => setOutput({ pan: Number(e.target.value) })}
-          style={{ flex: 1 }} />
-        <span style={{ width: 36, textAlign: 'right', fontSize: 11, color: '#888' }}>
+          style={{ flex: 1, accentColor: 'var(--accent-blue)' }} />
+        <span className="inspector-readout">
           {output.pan > 0 ? `R${Math.round(output.pan * 100)}` :
            output.pan < 0 ? `L${Math.round(-output.pan * 100)}` : 'C'}
         </span>

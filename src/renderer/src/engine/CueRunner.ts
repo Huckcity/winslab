@@ -40,7 +40,7 @@ export class CueRunner {
 
     // If this cue will auto-fire nextCue, skip selection past it so the next
     // manual Go lands on the cue after the auto-fired one
-    const selectionTarget = cue.advance !== 'none'
+    const selectionTarget = cue.advance && cue.advance !== 'none'
       ? (cues[targetIdx + 2] ?? null)
       : nextCue
     setSelected(selectionTarget?.id ?? null)

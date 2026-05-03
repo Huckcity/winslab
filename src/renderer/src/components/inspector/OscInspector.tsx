@@ -38,7 +38,8 @@ export function OscInspector({ cue }: Props) {
       {cue.args.map((arg, i) => (
         <div key={i} className="field-row">
           <label>Arg {i + 1}</label>
-          <select value={arg.type} onChange={e => updateArg(i, { type: e.target.value as OscArgType, value: arg.type !== e.target.value ? 0 : arg.value })}
+          <select value={arg.type}
+            onChange={e => updateArg(i, { type: e.target.value as OscArgType, value: arg.type !== e.target.value ? 0 : arg.value })}
             style={{ width: 50, flex: 'none' }}>
             <option value="i">int</option>
             <option value="f">float</option>
@@ -55,16 +56,14 @@ export function OscInspector({ cue }: Props) {
               onChange={e => updateArg(i, { value: e.target.value })} />
           )}
           {(arg.type === 'T' || arg.type === 'F') && (
-            <span style={{ flex: 1, color: '#888', fontSize: 11 }}>{arg.type === 'T' ? 'true' : 'false'}</span>
+            <span className="inspector-hint" style={{ flex: 1, marginTop: 0 }}>
+              {arg.type === 'T' ? 'true' : 'false'}
+            </span>
           )}
-          <button onClick={() => removeArg(i)} style={{ width: 20, height: 20, background: 'transparent',
-            border: 'none', color: '#666', cursor: 'pointer', fontSize: 12 }}>✕</button>
+          <button onClick={() => removeArg(i)} className="inspector-btn-icon">✕</button>
         </div>
       ))}
-      <button onClick={addArg} style={{ width: '100%', height: 28, background: '#252525',
-        border: '1px dashed #444', borderRadius: 3, color: '#888', cursor: 'pointer', fontSize: 12 }}>
-        + Add Argument
-      </button>
+      <button onClick={addArg} className="inspector-add-btn">+ Add Argument</button>
     </div>
   )
 }

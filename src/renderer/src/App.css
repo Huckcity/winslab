@@ -1,10 +1,146 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ─── Winslab Design Tokens ─────────────────────────────────────────────── */
 :root {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
-  font-size: 13px;
-  color: #ccc;
-  background: #181818;
+  /* Backgrounds */
+  --bg-well:          #111111;
+  --bg-base:          #181818;
+  --bg-raised:        #1a1a1a;
+  --bg-surface:       #1e1e1e;
+  --bg-card:          #252525;
+  --bg-input:         #2a2a2a;
+  --bg-hover:         #3a3a3a;
+  --bg-selected:      #0d1f33;
+
+  /* Borders */
+  --border:           #333333;
+  --border-soft:      #2a2a2a;
+  --border-input:     #444444;
+  --border-focus:     #4a9eff;
+
+  /* State row backgrounds */
+  --bg-selected-row:  #1e2d3d;
+  --bg-playing-row:   #1a2a1a;
+  --bg-prewait-row:   #2a2a1a;
+
+  /* Foreground */
+  --fg-primary:       #dddddd;
+  --fg-body:          #cccccc;
+  --fg-secondary:     #bbbbbb;
+  --fg-tertiary:      #aaaaaa;
+  --fg-muted:         #888888;
+  --fg-dim:           #666666;
+  --fg-ghost:         #555555;
+
+  /* Accent — amber */
+  --accent-amber:         #e0a020;
+  --accent-amber-bg:      rgba(224, 160, 32, 0.10);
+
+  /* Accent — blue */
+  --accent-blue:          #4a9eff;
+  --accent-blue-dim:      #2a6099;
+  --accent-blue-glow:     rgba(74, 158, 255, 0.15);
+  --accent-blue-overlay:  rgba(74, 158, 255, 0.60);
+
+  /* Transport / state */
+  --state-go:           #2d7a2d;
+  --state-go-hover:     #39a039;
+  --state-go-active:    #1e5a1e;
+  --state-stop:         #444444;
+  --state-stop-hover:   #555555;
+  --state-stop-active:  #333333;
+  --state-panic:        #7a2d2d;
+  --state-panic-hover:  #a03939;
+  --state-panic-active: #5a1e1e;
+  --state-running-bg:   #1e4a1e;
+  --state-running-fg:   #5aaa5a;
+
+  /* Cue color labels */
+  --cue-color-none:   transparent;
+  --cue-color-red:    #c0392b;
+  --cue-color-orange: #e67e22;
+  --cue-color-yellow: #f1c40f;
+  --cue-color-green:  #27ae60;
+  --cue-color-blue:   #2980b9;
+  --cue-color-purple: #8e44ad;
+  --cue-color-pink:   #e91e8c;
+
+  /* Typography */
+  --font-ui:   -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Segoe UI Mono', 'SF Mono', 'Consolas', monospace;
+
+  --font-size-base:   13px;
+  --line-height-base: 1.4;
+
+  --text-xs:   10px;
+  --text-sm:   11px;
+  --text-base: 12px;
+  --text-md:   13px;
+  --text-lg:   14px;
+
+  --fw-normal: 400;
+  --fw-medium: 600;
+  --fw-bold:   700;
+
+  --ls-caps:  0.06em;
+  --ls-wide:  0.08em;
+  --ls-brand: 0.05em;
+
+  /* State pill (running indicator in cue rows) */
+  --pill-bg:    #2a3a1a;
+  --pill-fg:    #7aaa5a;
+
+  /* Advance column in cue list */
+  --adv-fg:     #4a8a4a;
+
+  /* Spacing */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  /* Component heights */
+  --h-toolbar:          44px;
+  --h-cue-row:          32px;
+  --h-col-header:       26px;
+  --h-transport:        52px;
+  --h-waveform:        110px;
+  --h-waveform-header:  24px;
+  --h-button-sm:        26px;
+  --h-button-md:        28px;
+  --h-button-lg:        36px;
+  --h-input:            26px;
+
+  /* Layout */
+  --inspector-width: 320px;
+
+  /* Radius */
+  --radius-sm:   2px;
+  --radius-md:   3px;
+  --radius-lg:   4px;
+  --radius-xl:   5px;
+  --radius-pill: 10px;
+
+  /* Shadow */
+  --shadow-menu: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  /* Transitions */
+  --transition-fast: background 0.05s ease, color 0.05s ease;
+  --transition-std:  background 0.10s ease, color 0.10s ease, border-color 0.10s ease;
+
+  /* Scrollbar */
+  --scrollbar-width:       6px;
+  --scrollbar-track:       #1a1a1a;
+  --scrollbar-thumb:       #444444;
+  --scrollbar-thumb-hover: #555555;
+
+  /* Base styles */
+  font-family: var(--font-ui);
+  font-size: var(--font-size-base);
+  color: var(--fg-body);
+  background: var(--bg-base);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -17,18 +153,18 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: #181818;
+  background: var(--bg-base);
 }
 
 .app-main {
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: 1fr var(--inspector-width);
   min-height: 0;
   overflow: hidden;
 }
 
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #1a1a1a; }
-::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #555; }
+::-webkit-scrollbar { width: var(--scrollbar-width); }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: var(--radius-md); }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }

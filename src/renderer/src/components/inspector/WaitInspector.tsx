@@ -17,7 +17,7 @@ export function WaitInspector({ cue }: Props) {
           onChange={e => update(cue.id, { duration: Number(e.target.value) })}
         />
       </div>
-      <p style={{ color: '#666', fontSize: 11, marginTop: 12, lineHeight: 1.5 }}>
+      <p className="inspector-hint">
         Wait cues pause the sequence for the specified duration, then continue.
         Set Auto-follow on the Basics tab to automatically fire the next cue after waiting.
       </p>

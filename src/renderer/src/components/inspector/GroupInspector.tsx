@@ -65,7 +65,7 @@ export function GroupInspector({ cue }: Props) {
 
       <div className="field-section-title">Add Children</div>
       {candidates.length === 0 ? (
-        <p style={{ color: '#555', fontSize: 11 }}>No other cues available to add.</p>
+        <p className="inspector-hint">No other cues available to add.</p>
       ) : (
         <div className="group-candidates">
           {candidates.map(c => (

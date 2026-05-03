@@ -2,40 +2,42 @@
   position: relative;
   display: flex;
   align-items: center;
-  height: 32px;
-  padding: 0 8px;
+  height: var(--h-cue-row);
+  padding: 0 var(--space-2);
   border-bottom: 1px solid #222;
   cursor: pointer;
-  font-size: 12px;
-  color: #bbb;
+  font-size: var(--text-base);
+  color: var(--fg-secondary);
   user-select: none;
-  transition: background 0.05s;
+  transition: var(--transition-fast);
 }
 
-.cue-row:hover { background: #252525; }
-.cue-row[data-selected='true'] { background: #1e2d3d; color: #ddd; }
-.cue-row[data-running='true'] { background: #1a2a1a; }
-.cue-row[data-state='playing'] { background: #1a2a1a; animation: pulse 2s ease-in-out infinite; }
-.cue-row[data-state='pre-wait'] { background: #2a2a1a; }
+.cue-row:hover { background: var(--bg-card); }
+.cue-row[data-selected='true'] { background: var(--bg-selected-row); color: var(--fg-primary); }
+.cue-row[data-state='playing']  { background: var(--bg-playing-row); animation: pulse 2s ease-in-out infinite; }
+.cue-row[data-state='pre-wait'] { background: var(--bg-prewait-row); }
 
 @keyframes pulse {
-  0%, 100% { background: #1a2a1a; }
-  50% { background: #1e3a1e; }
+  0%, 100% { background: var(--bg-playing-row); }
+  50%       { background: #1e3a1e; }
 }
 
 .cue-type-icon {
   display: inline-block;
-  width: 14px;
-  font-size: 10px;
-  color: #666;
-  margin-right: 4px;
+  width: 18px;
+  font-size: var(--text-lg);
+  color: var(--fg-muted);
+  margin-right: var(--space-1);
+  text-align: center;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 .col-num {
   width: 52px;
   flex-shrink: 0;
-  color: #888;
-  font-size: 11px;
+  color: var(--fg-muted);
+  font-size: var(--text-sm);
   display: flex;
   align-items: center;
 }
@@ -43,7 +45,7 @@
 .col-color {
   width: 6px;
   height: 20px;
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
   flex-shrink: 0;
   margin-right: 10px;
 }
@@ -60,52 +62,53 @@
 }
 
 .name-text em {
-  color: #555;
+  color: var(--fg-ghost);
   font-style: normal;
 }
 
 .name-edit {
   flex: 1;
-  background: #0d1f33;
-  border: 1px solid #4a9eff;
-  border-radius: 2px;
-  color: #ddd;
-  font-size: 12px;
-  padding: 1px 4px;
+  background: var(--bg-selected);
+  border: 1px solid var(--border-focus);
+  border-radius: var(--radius-sm);
+  color: var(--fg-primary);
+  font-size: var(--text-base);
+  padding: 1px var(--space-1);
   outline: none;
   height: 22px;
+  font-family: inherit;
 }
 
 .state-pill {
-  font-size: 10px;
-  padding: 1px 5px;
-  border-radius: 8px;
-  background: #2a3a1a;
-  color: #7aaa5a;
+  font-size: var(--text-xs);
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--pill-bg);
+  color: var(--pill-fg);
   flex-shrink: 0;
 }
 
 .col-dur, .col-pre, .col-post {
-  color: #666;
+  color: var(--fg-dim);
+  font-variant-numeric: tabular-nums;
 }
 
 .col-adv {
-  color: #4a8a4a;
-  font-size: 10px;
+  color: var(--adv-fg);
+  font-size: var(--text-xs);
 }
 
-/* Audio progress bar — sits at the very bottom edge of the row */
 .cue-progress-bar {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   height: 2px;
-  background: rgba(74, 158, 255, 0.15);
+  background: var(--accent-blue-glow);
 }
 
 .cue-progress-fill {
   height: 100%;
-  background: #4a9eff;
+  background: var(--accent-blue);
   transition: width 0.05s linear;
 }

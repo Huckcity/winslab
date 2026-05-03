@@ -2,24 +2,24 @@
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  height: 110px;
-  background: #111;
-  border-top: 1px solid #2a2a2a;
+  height: var(--h-waveform);
+  background: var(--bg-well);
+  border-top: 1px solid var(--border-soft);
 }
 
 .waveform-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 4px 12px;
-  height: 24px;
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-3);
+  height: var(--h-waveform-header);
   flex-shrink: 0;
-  border-bottom: 1px solid #1e1e1e;
+  border-bottom: 1px solid var(--bg-surface);
 }
 
 .waveform-filename {
-  font-size: 11px;
-  color: #888;
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -29,42 +29,43 @@
 .waveform-times {
   margin-left: auto;
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: center;
-  font-size: 11px;
+  font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
 }
 
 .waveform-elapsed {
-  color: #4a9eff;
-  font-weight: 600;
+  color: var(--accent-blue);
+  font-weight: var(--fw-medium);
 }
 
 .waveform-hover {
-  color: #aaa;
+  color: var(--fg-tertiary);
 }
 
 .waveform-total {
-  color: #666;
+  color: var(--fg-dim);
 }
 
 .waveform-start-tag {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  color: #e0a020;
-  background: rgba(224, 160, 32, 0.1);
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--accent-amber);
+  background: var(--accent-amber-bg);
   padding: 1px 6px;
-  border-radius: 3px;
+  border-radius: var(--radius-md);
 }
 
 .waveform-start-tag button {
   background: none;
   border: none;
-  color: #e0a020;
+  color: var(--accent-amber);
   cursor: pointer;
-  font-size: 10px;
+  font-size: var(--text-xs);
   padding: 0;
   line-height: 1;
   opacity: 0.7;
@@ -91,6 +92,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  color: #555;
+  font-size: var(--text-sm);
+  color: var(--fg-ghost);
 }

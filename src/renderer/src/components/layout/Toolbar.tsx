@@ -4,16 +4,19 @@ import { useWorkspace } from '../../hooks/useWorkspace'
 import type { CueType } from '../../types/cue'
 import './Toolbar.css'
 
-const CUE_TYPES: { type: CueType; label: string }[] = [
-  { type: 'audio', label: 'Audio' },
-  { type: 'midi', label: 'MIDI' },
-  { type: 'osc', label: 'OSC' },
-  { type: 'wait', label: 'Wait' },
-  { type: 'fade', label: 'Fade' },
-  { type: 'stop', label: 'Stop' },
-  { type: 'group', label: 'Group' },
-  { type: 'network', label: 'Network' },
-  { type: 'script', label: 'Script' },
+const PRIMARY_CUES: { type: CueType; icon: string; label: string }[] = [
+  { type: 'audio', icon: '♪', label: 'Audio' },
+  { type: 'group', icon: '▤', label: 'Group' },
+  { type: 'fade',  icon: '↘', label: 'Fade'  },
+  { type: 'wait',  icon: '⏱', label: 'Wait'  },
+  { type: 'stop',  icon: '■', label: 'Stop'  },
+]
+
+const MORE_CUES: { type: CueType; icon: string; label: string }[] = [
+  { type: 'midi',    icon: 'M',    label: 'MIDI'    },
+  { type: 'osc',     icon: 'O',    label: 'OSC'     },
+  { type: 'network', icon: '⊕',   label: 'Network' },
+  { type: 'script',  icon: '{ }', label: 'Script'  },
 ]
 
 export function Toolbar() {
@@ -30,35 +33,34 @@ export function Toolbar() {
       }
     }
   }
+
   const { workspaceName, workspacePath, isDirty, newWorkspace, openWorkspace, save, saveAs, setWorkspaceName } =
     useWorkspace()
 
   const [fileMenuOpen, setFileMenuOpen] = useState(false)
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false)
   const [editingName, setEditingName] = useState(false)
   const [recentFiles, setRecentFiles] = useState<string[]>([])
-  const menuRef = useRef<HTMLDivElement>(null)
+  const fileMenuRef = useRef<HTMLDivElement>(null)
+  const moreMenuRef = useRef<HTMLDivElement>(null)
   const nameRef = useRef<HTMLInputElement>(null)
 
-  // Load recent files when menu opens
   useEffect(() => {
     if (fileMenuOpen) {
       window.winslab.workspace.recent().then(setRecentFiles)
     }
   }, [fileMenuOpen])
 
-  // Close menu on outside click
   useEffect(() => {
-    if (!fileMenuOpen) return
+    if (!fileMenuOpen && !moreMenuOpen) return
     const handler = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setFileMenuOpen(false)
-      }
+      if (fileMenuRef.current && !fileMenuRef.current.contains(e.target as Node)) setFileMenuOpen(false)
+      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) setMoreMenuOpen(false)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
-  }, [fileMenuOpen])
+  }, [fileMenuOpen, moreMenuOpen])
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey
@@ -90,28 +92,24 @@ export function Toolbar() {
   return (
     <div className="toolbar">
       <div className="toolbar-left">
-        <div className="file-menu-wrapper" ref={menuRef}>
-          <button
-            className="toolbar-brand"
-            onClick={() => setFileMenuOpen(v => !v)}
-            title="File menu"
-          >
+        <div className="file-menu-wrapper" ref={fileMenuRef}>
+          <button className="toolbar-brand" onClick={() => setFileMenuOpen(v => !v)} title="File menu">
             WinsLab ▾
           </button>
           {fileMenuOpen && (
             <div className="file-menu">
               <button onClick={() => handleMenuAction(newWorkspace)}>
-                New <kbd>⌘N</kbd>
+                <span>New</span><kbd>⌘N</kbd>
               </button>
               <button onClick={() => handleMenuAction(openWorkspace)}>
-                Open… <kbd>⌘O</kbd>
+                <span>Open…</span><kbd>⌘O</kbd>
               </button>
               <div className="file-menu-separator" />
               <button onClick={() => handleMenuAction(save)}>
-                Save <kbd>⌘S</kbd>
+                <span>Save</span><kbd>⌘S</kbd>
               </button>
               <button onClick={() => handleMenuAction(saveAs)}>
-                Save As… <kbd>⇧⌘S</kbd>
+                <span>Save As…</span><kbd>⇧⌘S</kbd>
               </button>
               {recentFiles.length > 0 && (
                 <>
@@ -128,7 +126,7 @@ export function Toolbar() {
                       )}
                       title={p}
                     >
-                      {p.split('/').pop()}
+                      <span>{p.split('/').pop()}</span>
                     </button>
                   ))}
                 </>
@@ -159,17 +157,34 @@ export function Toolbar() {
         </div>
       </div>
 
+      <div className="toolbar-divider" />
+
       <div className="toolbar-actions">
-        <span className="toolbar-label">Add Cue:</span>
-        {CUE_TYPES.map(({ type, label }) => (
-          <button
-            key={type}
-            className="toolbar-cue-btn"
-            onClick={() => handleAddCue(type)}
-          >
-            {label}
+        {PRIMARY_CUES.map(({ type, icon, label }) => (
+          <button key={type} className="toolbar-cue-btn" onClick={() => handleAddCue(type)}>
+            {icon} {label}
           </button>
         ))}
+
+        <div ref={moreMenuRef} style={{ position: 'relative' }}>
+          <button className="toolbar-more-btn" onClick={() => setMoreMenuOpen(v => !v)}>
+            More ▾
+          </button>
+          {moreMenuOpen && (
+            <div className="toolbar-more-menu">
+              {MORE_CUES.map(({ type, icon, label }) => (
+                <button
+                  key={type}
+                  className="toolbar-more-menu-item"
+                  onClick={() => { handleAddCue(type); setMoreMenuOpen(false) }}
+                >
+                  <span className="toolbar-more-menu-icon">{icon}</span>
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

@@ -2,6 +2,26 @@ import { app, dialog, BrowserWindow } from 'electron'
 import { readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 import type { Workspace } from '../../renderer/src/types/workspace'
+import type { Cue } from '../../renderer/src/types/cue'
+
+function migrateCue(cue: Cue & Record<string, unknown>): Cue {
+  // Normalize fields added after initial release
+  if (cue.advance === undefined) cue.advance = 'none'
+  if (cue.preWait === undefined) cue.preWait = 0
+  if (cue.postWait === undefined) cue.postWait = 0
+  if (cue.colorLabel === undefined) cue.colorLabel = 'none'
+  if (cue.isArmed === undefined) cue.isArmed = true
+  if (cue.notes === undefined) cue.notes = ''
+  // Strip legacy boolean advance fields
+  delete cue.autoContinue
+  delete cue.autoFollow
+  return cue
+}
+
+function migrateWorkspace(workspace: Workspace): Workspace {
+  workspace.cues = workspace.cues.map(c => migrateCue(c as Cue & Record<string, unknown>))
+  return workspace
+}
 
 const RECENT_KEY = 'recentWorkspaces'
 const MAX_RECENT = 10
@@ -46,7 +66,7 @@ export async function openWorkspace(
 
   const filePath = result.filePaths[0]
   const raw = await readFile(filePath, 'utf-8')
-  const workspace: Workspace = JSON.parse(raw)
+  const workspace: Workspace = migrateWorkspace(JSON.parse(raw))
   await addToRecent(filePath)
   return { path: filePath, workspace }
 }
@@ -55,7 +75,7 @@ export async function openWorkspaceFromPath(
   filePath: string
 ): Promise<{ path: string; workspace: Workspace }> {
   const raw = await readFile(filePath, 'utf-8')
-  const workspace: Workspace = JSON.parse(raw)
+  const workspace: Workspace = migrateWorkspace(JSON.parse(raw))
   await addToRecent(filePath)
   return { path: filePath, workspace }
 }

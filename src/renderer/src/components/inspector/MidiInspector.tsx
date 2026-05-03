@@ -49,13 +49,12 @@ export function MidiInspector({ cue }: Props) {
         <button
           onClick={() => window.winslab.midi.listPorts().then(setPorts)}
           title="Refresh ports"
-          style={{ marginLeft: 4, padding: '0 6px', height: 26, background: '#2a2a2a',
-            border: '1px solid #444', borderRadius: 3, color: '#888', cursor: 'pointer', fontSize: 12 }}
+          className="inspector-btn"
         >↻</button>
       </div>
       <div className="field-section-title">Messages</div>
       {cue.messages.map((msg, i) => (
-        <div key={i} style={{ background: '#252525', borderRadius: 4, padding: '8px', marginBottom: 6 }}>
+        <div key={i} className="inspector-card">
           <div className="field-row">
             <label>Type</label>
             <select value={msg.kind} onChange={e => updateMsg(i, { kind: e.target.value as any })}>
@@ -65,9 +64,7 @@ export function MidiInspector({ cue }: Props) {
               <option value="programChange">Program Change</option>
               <option value="sysex">SysEx</option>
             </select>
-            <button onClick={() => removeMsg(i)} style={{ marginLeft: 4, padding: '0 6px',
-              height: 26, background: '#3a2020', border: '1px solid #5a3030', borderRadius: 3,
-              color: '#c0392b', cursor: 'pointer', fontSize: 11 }}>✕</button>
+            <button onClick={() => removeMsg(i)} className="inspector-btn-danger">✕</button>
           </div>
           {msg.kind !== 'sysex' && (
             <div className="field-row">
@@ -126,10 +123,7 @@ export function MidiInspector({ cue }: Props) {
           )}
         </div>
       ))}
-      <button onClick={addMsg} style={{ width: '100%', height: 28, background: '#252525',
-        border: '1px dashed #444', borderRadius: 3, color: '#888', cursor: 'pointer', fontSize: 12 }}>
-        + Add Message
-      </button>
+      <button onClick={addMsg} className="inspector-add-btn">+ Add Message</button>
     </div>
   )
 }
