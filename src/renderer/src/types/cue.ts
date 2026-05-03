@@ -6,6 +6,7 @@ export interface CueBase {
   number: string
   name: string
   colorLabel: CueColor
+  parentId: string | null
   preWait: number
   postWait: number
   duration: number
@@ -86,7 +87,6 @@ export type GroupMode = 'playlist' | 'random' | 'sequence'
 export interface GroupCue extends CueBase {
   type: 'group'
   mode: GroupMode
-  childIds: string[]
 }
 
 export interface NetworkCue extends CueBase {

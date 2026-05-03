@@ -116,6 +116,70 @@ describe('store — moveCue', () => {
   })
 })
 
+describe('store — groups and parentId', () => {
+  beforeEach(resetStore)
+
+  it('adding a cue after a group header makes it a child', () => {
+    useStore.getState().addCue('group')
+    const groupId = useStore.getState().cues[0].id
+    useStore.getState().addCue('wait', groupId)
+
+    const cues = useStore.getState().cues
+    expect(cues).toHaveLength(2)
+    expect(cues[1].parentId).toBe(groupId)
+  })
+
+  it('adding a cue after a child inherits the same parentId', () => {
+    useStore.getState().addCue('group')
+    const groupId = useStore.getState().cues[0].id
+    useStore.getState().addCue('wait', groupId)         // child
+    const childId = useStore.getState().cues[1].id
+    useStore.getState().addCue('audio', childId)        // sibling child
+
+    const cues = useStore.getState().cues
+    expect(cues[2].parentId).toBe(groupId)
+  })
+
+  it('removing a group also removes its children', () => {
+    useStore.getState().addCue('group')
+    const groupId = useStore.getState().cues[0].id
+    useStore.getState().addCue('wait', groupId)
+    useStore.getState().addCue('audio', groupId)
+    expect(useStore.getState().cues).toHaveLength(3)
+
+    useStore.getState().removeCue(groupId)
+    expect(useStore.getState().cues).toHaveLength(0)
+  })
+
+  it('moveCue with newParentId updates the parentId', () => {
+    useStore.getState().addCue('group')
+    const groupId = useStore.getState().cues[0].id
+    useStore.getState().addCue('wait')                  // top-level wait at index 1
+
+    // Remove from index 1, re-insert at index 1 (post-removal), with new parentId
+    useStore.getState().moveCue(1, 1, groupId)
+    expect(useStore.getState().cues[1].parentId).toBe(groupId)
+  })
+
+  it('duplicating a group duplicates its children too', () => {
+    useStore.getState().addCue('group')
+    const groupId = useStore.getState().cues[0].id
+    useStore.getState().addCue('wait', groupId)
+    useStore.getState().addCue('audio', groupId)
+    expect(useStore.getState().cues).toHaveLength(3)
+
+    useStore.getState().duplicateCue(groupId)
+    const cues = useStore.getState().cues
+    expect(cues).toHaveLength(6)
+
+    const copyGroup = cues[3]
+    expect(copyGroup.type).toBe('group')
+    expect(copyGroup.id).not.toBe(groupId)
+    expect(cues[4].parentId).toBe(copyGroup.id)
+    expect(cues[5].parentId).toBe(copyGroup.id)
+  })
+})
+
 describe('store — duplicateCue', () => {
   beforeEach(resetStore)
 

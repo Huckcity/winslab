@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Cue, CueType, AudioCue } from '../types/cue'
+import type { Cue, CueType, AudioCue, GroupCue } from '../types/cue'
 import { createCue } from '../utils/cueDefaults'
 
 export type RunState = 'idle' | 'pre-wait' | 'playing' | 'post-wait'
@@ -27,7 +27,7 @@ interface CueListState {
   addAudioCuesFromFiles: (files: Array<{ filePath: string; name: string }>, afterId?: string) => void
   removeCue: (id: string) => void
   updateCue: (id: string, patch: Partial<Cue>) => void
-  moveCue: (fromIndex: number, toIndex: number) => void
+  moveCue: (fromIndex: number, toIndex: number, newParentId?: string | null) => void
   duplicateCue: (id: string) => void
 
   // Selection
@@ -44,6 +44,15 @@ interface CueListState {
   setWorkspaceName: (name: string) => void
 }
 
+// Returns the flat index of the last child belonging to groupId,
+// or the group's own index if it has no children.
+function lastChildIndex(cues: Cue[], groupId: string): number {
+  const groupIdx = cues.findIndex(c => c.id === groupId)
+  let last = groupIdx
+  while (last + 1 < cues.length && cues[last + 1].parentId === groupId) last++
+  return last
+}
+
 export const useStore = create<CueListState>((set) => ({
   workspaceName: 'Untitled',
   workspacePath: null,
@@ -56,50 +65,111 @@ export const useStore = create<CueListState>((set) => ({
   addCue: (type, afterId) => set(s => {
     const cue = createCue(type)
     const cues = [...s.cues]
-    const idx = afterId ? cues.findIndex(c => c.id === afterId) + 1 : cues.length
-    cues.splice(idx, 0, cue)
+
+    let insertIdx: number
+    if (!afterId) {
+      insertIdx = cues.length
+    } else {
+      const afterCue = cues.find(c => c.id === afterId)
+      if (afterCue?.type === 'group') {
+        // Inserting after a group header → becomes its last child
+        cue.parentId = afterId
+        insertIdx = lastChildIndex(cues, afterId) + 1
+      } else {
+        // Inserting after a regular cue or group child → inherit context
+        cue.parentId = afterCue?.parentId ?? null
+        insertIdx = cues.findIndex(c => c.id === afterId) + 1
+      }
+    }
+
+    cues.splice(insertIdx, 0, cue)
     return { cues, selectedId: cue.id, isDirty: true }
   }),
 
   addAudioCuesFromFiles: (files, afterId) => set(s => {
     const cues = [...s.cues]
-    const insertIdx = afterId ? cues.findIndex(c => c.id === afterId) + 1 : cues.length
+    let insertIdx: number
+    let parentId: string | null = null
+
+    if (!afterId) {
+      insertIdx = cues.length
+    } else {
+      const afterCue = cues.find(c => c.id === afterId)
+      if (afterCue?.type === 'group') {
+        parentId = afterId
+        insertIdx = lastChildIndex(cues, afterId) + 1
+      } else {
+        parentId = afterCue?.parentId ?? null
+        insertIdx = cues.findIndex(c => c.id === afterId) + 1
+      }
+    }
+
     const newCues: Cue[] = files.map(({ filePath, name }) => ({
       ...(createCue('audio') as AudioCue),
       filePath,
-      name
+      name,
+      parentId,
     }))
     cues.splice(insertIdx, 0, ...newCues)
     const lastAdded = newCues[newCues.length - 1]
     return { cues, selectedId: lastAdded.id, isDirty: true }
   }),
 
-  removeCue: (id) => set(s => ({
-    cues: s.cues.filter(c => c.id !== id),
-    selectedId: s.selectedId === id ? null : s.selectedId,
-    isDirty: true
-  })),
+  removeCue: (id) => set(s => {
+    // Collect the cue and all its children (if it's a group)
+    const toRemove = new Set<string>([id])
+    for (const c of s.cues) {
+      if (c.parentId === id) toRemove.add(c.id)
+    }
+    return {
+      cues: s.cues.filter(c => !toRemove.has(c.id)),
+      selectedId: toRemove.has(s.selectedId ?? '') ? null : s.selectedId,
+      isDirty: true
+    }
+  }),
 
   updateCue: (id, patch) => set(s => ({
     cues: s.cues.map(c => c.id === id ? { ...c, ...patch } as Cue : c),
     isDirty: true
   })),
 
-  moveCue: (fromIndex, toIndex) => set(s => {
+  // toIndex is the insertion index AFTER fromIndex has been removed from the array.
+  moveCue: (fromIndex, toIndex, newParentId) => set(s => {
     const cues = [...s.cues]
     const [moved] = cues.splice(fromIndex, 1)
-    cues.splice(toIndex, 0, moved)
+    const parentId = newParentId !== undefined ? newParentId : moved.parentId
+    cues.splice(toIndex, 0, { ...moved, parentId })
     return { cues, isDirty: true }
   }),
 
   duplicateCue: (id) => set(s => {
     const src = s.cues.find(c => c.id === id)
     if (!src) return s
-    const copy: Cue = { ...src, id: crypto.randomUUID(), number: src.number + ' copy' }
-    const idx = s.cues.findIndex(c => c.id === id)
+
+    const newGroupId = crypto.randomUUID()
+    const isGroup = src.type === 'group'
+
+    // Build the duplicated cue(s)
+    const copies: Cue[] = [{
+      ...src,
+      id: isGroup ? newGroupId : crypto.randomUUID(),
+      number: src.number + ' copy'
+    }]
+
+    if (isGroup) {
+      // Duplicate all children with updated parentId
+      const children = s.cues.filter(c => c.parentId === id)
+      for (const child of children) {
+        copies.push({ ...child, id: crypto.randomUUID(), parentId: newGroupId })
+      }
+    }
+
+    // Insert after the original cue (and its children)
+    const srcIdx = s.cues.findIndex(c => c.id === id)
+    const insertAfter = isGroup ? lastChildIndex([...s.cues], id) : srcIdx
     const cues = [...s.cues]
-    cues.splice(idx + 1, 0, copy)
-    return { cues, selectedId: copy.id, isDirty: true }
+    cues.splice(insertAfter + 1, 0, ...copies)
+    return { cues, selectedId: copies[0].id, isDirty: true }
   }),
 
   select: (id) => set({ selectedId: id }),
@@ -113,7 +183,6 @@ export const useStore = create<CueListState>((set) => ({
 
   clearAllRunning: () => set({ running: new Map() }),
 
-  // Syncs duration from the audio file — does NOT mark workspace dirty
   syncCueDuration: (id, durationMs) => set(s => {
     const cue = s.cues.find(c => c.id === id)
     if (!cue || cue.duration === durationMs) return s
@@ -125,7 +194,7 @@ export const useStore = create<CueListState>((set) => ({
     workspaceName: name,
     workspacePath: path,
     isDirty: false,
-    selectedId: cues[0]?.id ?? null,
+    selectedId: cues.find(c => c.parentId === null)?.id ?? cues[0]?.id ?? null,
     running: new Map()
   }),
 
@@ -140,4 +209,14 @@ export const useStore = create<CueListState>((set) => ({
 
 export function useSelectedCue(): Cue | null {
   return useStore(s => s.cues.find(c => c.id === s.selectedId) ?? null)
+}
+
+// Returns the GroupCue that owns the given cue, or null.
+export function useParentGroup(cueId: string): GroupCue | null {
+  return useStore(s => {
+    const cue = s.cues.find(c => c.id === cueId)
+    if (!cue?.parentId) return null
+    const parent = s.cues.find(c => c.id === cue.parentId)
+    return parent?.type === 'group' ? (parent as GroupCue) : null
+  })
 }

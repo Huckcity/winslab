@@ -36,12 +36,29 @@ export class CueRunner {
     const cue = cues[targetIdx]
     if (!cue || !cue.isArmed) return
 
-    const nextCue = cues[targetIdx + 1] ?? null
+    // When the fired cue is a group, skip over its children to find the next
+    // cue that should receive selection focus after GO
+    const nextCue = (() => {
+      if (cue.type === 'group') {
+        let i = targetIdx + 1
+        while (i < cues.length && cues[i].parentId === cue.id) i++
+        return cues[i] ?? null
+      }
+      return cues[targetIdx + 1] ?? null
+    })()
 
-    // If this cue will auto-fire nextCue, skip selection past it so the next
-    // manual Go lands on the cue after the auto-fired one
+    // If this cue will auto-fire nextCue, skip selection past it
     const selectionTarget = cue.advance && cue.advance !== 'none'
-      ? (cues[targetIdx + 2] ?? null)
+      ? (() => {
+          if (!nextCue) return null
+          const nextIdx = cues.findIndex(c => c.id === nextCue.id)
+          if (nextCue.type === 'group') {
+            let i = nextIdx + 1
+            while (i < cues.length && cues[i].parentId === nextCue.id) i++
+            return cues[i] ?? null
+          }
+          return cues[nextIdx + 1] ?? null
+        })()
       : nextCue
     setSelected(selectionTarget?.id ?? null)
 
@@ -175,9 +192,7 @@ export class CueRunner {
 
   private executeGroup(cue: GroupCue, onDone: () => void): void {
     const allCues = this.deps!.getCues()
-    const children = cue.childIds
-      .map(id => allCues.find(c => c.id === id))
-      .filter((c): c is Cue => c !== undefined && c.isArmed)
+    const children = allCues.filter(c => c.parentId === cue.id && c.isArmed)
 
     if (children.length === 0) { onDone(); return }
 

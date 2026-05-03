@@ -12,6 +12,13 @@
   transition: var(--transition-fast);
 }
 
+/* Child rows */
+.cue-row[data-depth='1'] {
+  padding-left: 28px;
+  background: var(--bg-raised);
+  border-left: 2px solid var(--border);
+}
+
 .cue-row:hover { background: var(--bg-card); }
 .cue-row[data-selected='true'] { background: var(--bg-selected-row); color: var(--fg-primary); }
 .cue-row[data-state='playing']  { background: var(--bg-playing-row); animation: pulse 2s ease-in-out infinite; }
@@ -40,7 +47,27 @@
   font-size: var(--text-sm);
   display: flex;
   align-items: center;
+  gap: 2px;
 }
+
+.group-toggle {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--fg-muted);
+  font-size: 9px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  transition: var(--transition-fast);
+}
+
+.group-toggle:hover { color: var(--fg-primary); background: var(--bg-card); }
 
 .col-color {
   width: 6px;

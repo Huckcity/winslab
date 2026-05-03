@@ -6,7 +6,6 @@ import { formatDuration } from '../../utils/cueDefaults'
 import { audioPlayer } from '../../engine/AudioPlayer'
 import './CueRow.css'
 
-
 const COLOR_MAP: Record<CueColor, string> = {
   none:   'var(--cue-color-none)',
   red:    'var(--cue-color-red)',
@@ -32,12 +31,15 @@ const TYPE_ICON: Record<string, string> = {
 
 interface Props {
   cue: Cue
+  depth: number
   isSelected: boolean
   runState: RunningCue | null
+  collapsed?: boolean
+  onToggleCollapse?: () => void
   onClick: () => void
 }
 
-export function CueRow({ cue, isSelected, runState, onClick }: Props) {
+export function CueRow({ cue, depth, isSelected, runState, collapsed, onToggleCollapse, onClick }: Props) {
   const updateCue = useStore(s => s.updateCue)
   const [editing, setEditing] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -46,7 +48,6 @@ export function CueRow({ cue, isSelected, runState, onClick }: Props) {
 
   const isAudioPlaying = cue.type === 'audio' && runState?.state === 'playing'
 
-  // Update progress bar imperatively — avoids React re-renders on every rAF tick
   useEffect(() => {
     if (!isAudioPlaying) {
       if (progressFillRef.current) progressFillRef.current.style.width = '0%'
@@ -77,6 +78,7 @@ export function CueRow({ cue, isSelected, runState, onClick }: Props) {
     setEditing(false)
   }
 
+  const isGroup = cue.type === 'group'
   const isRunning = runState !== null
 
   return (
@@ -85,11 +87,22 @@ export function CueRow({ cue, isSelected, runState, onClick }: Props) {
       data-selected={isSelected}
       data-running={isRunning}
       data-state={runState?.state}
+      data-depth={depth}
       onClick={onClick}
       onDoubleClick={startEdit}
     >
       <span className="col-num">
-        <span className="cue-type-icon" title={cue.type}>{TYPE_ICON[cue.type]}</span>
+        {isGroup ? (
+          <button
+            className="group-toggle"
+            onClick={e => { e.stopPropagation(); onToggleCollapse?.() }}
+            title={collapsed ? 'Expand group' : 'Collapse group'}
+          >
+            {collapsed ? '▶' : '▼'}
+          </button>
+        ) : (
+          <span className="cue-type-icon" title={cue.type}>{TYPE_ICON[cue.type]}</span>
+        )}
         {cue.number}
       </span>
       <span
@@ -97,6 +110,9 @@ export function CueRow({ cue, isSelected, runState, onClick }: Props) {
         style={{ background: COLOR_MAP[cue.colorLabel] }}
       />
       <span className="col-name">
+        {isGroup && (
+          <span className="cue-type-icon" title="group">{TYPE_ICON.group}</span>
+        )}
         {editing ? (
           <input
             ref={inputRef}

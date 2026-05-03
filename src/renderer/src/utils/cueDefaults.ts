@@ -13,6 +13,7 @@ function base(name: string): Omit<Cue, 'type'> {
     number: nextNumber(),
     name,
     colorLabel: 'none',
+    parentId: null,
     preWait: 0,
     postWait: 0,
     duration: 0,
@@ -81,7 +82,6 @@ export function createCue(type: CueType): Cue {
         ...base('Group'),
         type: 'group',
         mode: 'sequence',
-        childIds: []
       } satisfies GroupCue
     case 'network':
       return {

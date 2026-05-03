@@ -47,12 +47,18 @@ describe('createCue', () => {
     expect(cue.duration).toBeGreaterThan(0)
   })
 
-  it('group cue defaults to sequence mode', () => {
+  it('group cue defaults to sequence mode with no parent', () => {
     const cue = createCue('group')
     if (cue.type !== 'group') throw new Error('wrong type')
     expect(cue.mode).toBe('sequence')
-    expect(cue.childIds).toEqual([])
+    expect(cue.parentId).toBeNull()
   })
+
+  it.each(['audio', 'midi', 'osc', 'wait', 'fade', 'stop', 'group', 'network', 'script'] as CueType[])(
+    '%s cue has parentId null by default', (type) => {
+      expect(createCue(type).parentId).toBeNull()
+    }
+  )
 })
 
 describe('formatDuration', () => {

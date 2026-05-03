@@ -5,21 +5,52 @@ import type { Workspace } from '../../renderer/src/types/workspace'
 import type { Cue } from '../../renderer/src/types/cue'
 
 function migrateCue(cue: Cue & Record<string, unknown>): Cue {
-  // Normalize fields added after initial release
   if (cue.advance === undefined) cue.advance = 'none'
   if (cue.preWait === undefined) cue.preWait = 0
   if (cue.postWait === undefined) cue.postWait = 0
   if (cue.colorLabel === undefined) cue.colorLabel = 'none'
   if (cue.isArmed === undefined) cue.isArmed = true
   if (cue.notes === undefined) cue.notes = ''
-  // Strip legacy boolean advance fields
+  if (cue.parentId === undefined) cue.parentId = null
   delete cue.autoContinue
   delete cue.autoFollow
   return cue
 }
 
 function migrateWorkspace(workspace: Workspace): Workspace {
-  workspace.cues = workspace.cues.map(c => migrateCue(c as Cue & Record<string, unknown>))
+  // Pass 1: normalize all cues
+  const cues = workspace.cues.map(c => migrateCue(c as Cue & Record<string, unknown>))
+
+  // Pass 2: convert legacy childIds → parentId
+  // Groups that still have childIds haven't been converted yet
+  const needsConversion = cues.filter(
+    c => c.type === 'group' && Array.isArray((c as Record<string, unknown>).childIds)
+  )
+
+  for (const group of needsConversion) {
+    const childIds: string[] = (group as Record<string, unknown>).childIds as string[]
+    // Mark children with this parentId
+    for (const cue of cues) {
+      if (childIds.includes(cue.id)) cue.parentId = group.id
+    }
+    // Reorder: pull children out and re-insert immediately after the group
+    const groupIdx = cues.findIndex(c => c.id === group.id)
+    const children = childIds
+      .map(id => cues.find(c => c.id === id))
+      .filter((c): c is Cue => c !== undefined)
+    // Remove children from wherever they sit
+    for (const child of children) {
+      const i = cues.indexOf(child)
+      if (i > -1) cues.splice(i, 1)
+    }
+    // Re-insert after group (group index may have shifted)
+    const newGroupIdx = cues.findIndex(c => c.id === group.id)
+    cues.splice(newGroupIdx + 1, 0, ...children)
+    // Remove the now-obsolete childIds field
+    delete (group as Record<string, unknown>).childIds
+  }
+
+  workspace.cues = cues
   return workspace
 }
 

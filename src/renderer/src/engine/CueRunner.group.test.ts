@@ -7,21 +7,21 @@ vi.mock('./AudioPlayer', () => ({
   audioPlayer: { play: vi.fn(), stop: vi.fn(), stopAll: vi.fn(), setVolume: vi.fn() }
 }))
 
-function makeWait(id: string, overrides: Partial<WaitCue> = {}): WaitCue {
+function makeGroup(id: string, overrides: Partial<GroupCue> = {}): GroupCue {
   return {
-    id, number: id, name: id, type: 'wait',
-    colorLabel: 'none', preWait: 0, postWait: 0, duration: 100,
+    id, number: id, name: id, type: 'group',
+    colorLabel: 'none', parentId: null, preWait: 0, postWait: 0, duration: 0,
     advance: 'none', isArmed: true, notes: '',
+    mode: 'sequence',
     ...overrides
   }
 }
 
-function makeGroup(id: string, childIds: string[], overrides: Partial<GroupCue> = {}): GroupCue {
+function makeWait(id: string, parentId: string | null, overrides: Partial<WaitCue> = {}): WaitCue {
   return {
-    id, number: id, name: id, type: 'group',
-    colorLabel: 'none', preWait: 0, postWait: 0, duration: 0,
+    id, number: id, name: id, type: 'wait',
+    colorLabel: 'none', parentId, preWait: 0, postWait: 0, duration: 100,
     advance: 'none', isArmed: true, notes: '',
-    mode: 'sequence', childIds,
     ...overrides
   }
 }
@@ -46,10 +46,10 @@ describe('CueRunner — group cue (sequence mode)', () => {
   afterEach(() => { vi.useRealTimers(); vi.clearAllMocks() })
 
   it('runs all children in order before calling done', () => {
-    const c1 = makeWait('c1', { duration: 100 })
-    const c2 = makeWait('c2', { duration: 100 })
-    const c3 = makeWait('c3', { duration: 100 })
-    const group = makeGroup('g1', ['c1', 'c2', 'c3'])
+    const group = makeGroup('g1')
+    const c1 = makeWait('c1', 'g1', { duration: 100 })
+    const c2 = makeWait('c2', 'g1', { duration: 100 })
+    const c3 = makeWait('c3', 'g1', { duration: 100 })
     const { runner, setRunning } = setup([group, c1, c2, c3])
 
     runner.go()
@@ -64,9 +64,9 @@ describe('CueRunner — group cue (sequence mode)', () => {
   })
 
   it('runs children sequentially — c2 does not start until c1 finishes', () => {
-    const c1 = makeWait('c1', { duration: 500 })
-    const c2 = makeWait('c2', { duration: 100 })
-    const group = makeGroup('g1', ['c1', 'c2'])
+    const group = makeGroup('g1')
+    const c1 = makeWait('c1', 'g1', { duration: 500 })
+    const c2 = makeWait('c2', 'g1', { duration: 100 })
     const { runner, setRunning } = setup([group, c1, c2])
 
     runner.go()
@@ -78,7 +78,7 @@ describe('CueRunner — group cue (sequence mode)', () => {
     expect(firedSoFar).toContain('c1')
     expect(firedSoFar).not.toContain('c2')
 
-    vi.runAllTimers() // c1 finishes, c2 starts
+    vi.runAllTimers()
     const allFired = setRunning.mock.calls
       .filter(c => c[1]?.state === 'playing')
       .map(c => c[0])
@@ -86,9 +86,9 @@ describe('CueRunner — group cue (sequence mode)', () => {
   })
 
   it('skips disarmed children', () => {
-    const c1 = makeWait('c1', { isArmed: false })
-    const c2 = makeWait('c2')
-    const group = makeGroup('g1', ['c1', 'c2'])
+    const group = makeGroup('g1')
+    const c1 = makeWait('c1', 'g1', { isArmed: false })
+    const c2 = makeWait('c2', 'g1')
     const { runner, setRunning } = setup([group, c1, c2])
 
     runner.go()
@@ -100,13 +100,12 @@ describe('CueRunner — group cue (sequence mode)', () => {
   })
 
   it('calls done immediately when child list is empty', () => {
-    const group = makeGroup('g1', [])
+    const group = makeGroup('g1')
     const { runner, setRunning } = setup([group])
 
     runner.go()
     vi.runAllTimers()
 
-    // group itself transitions to post-wait then null
     expect(setRunning).toHaveBeenCalledWith('g1', null)
   })
 })
@@ -116,10 +115,10 @@ describe('CueRunner — group cue (random mode)', () => {
   afterEach(() => { vi.useRealTimers(); vi.clearAllMocks() })
 
   it('fires exactly one child in random mode', () => {
-    const c1 = makeWait('c1')
-    const c2 = makeWait('c2')
-    const c3 = makeWait('c3')
-    const group = makeGroup('g1', ['c1', 'c2', 'c3'], { mode: 'random' })
+    const group = makeGroup('g1', { mode: 'random' })
+    const c1 = makeWait('c1', 'g1')
+    const c2 = makeWait('c2', 'g1')
+    const c3 = makeWait('c3', 'g1')
     const { runner, setRunning } = setup([group, c1, c2, c3])
 
     runner.go()
@@ -131,5 +130,31 @@ describe('CueRunner — group cue (random mode)', () => {
       .filter(id => id !== 'g1')
     expect(fired).toHaveLength(1)
     expect(['c1', 'c2', 'c3']).toContain(fired[0])
+  })
+})
+
+describe('CueRunner — selection skips group children', () => {
+  beforeEach(() => vi.useFakeTimers())
+  afterEach(() => { vi.useRealTimers(); vi.clearAllMocks() })
+
+  it('GO on a group advances selection past its children to the next top-level cue', () => {
+    const group = makeGroup('g1')
+    const c1 = makeWait('c1', 'g1')
+    const c2 = makeWait('c2', 'g1')
+    const next = makeWait('next', null)
+    const setSelected = vi.fn()
+
+    const runner = new CueRunner()
+    runner.init({
+      getCues: () => [group, c1, c2, next],
+      getSelected: () => 'g1',
+      setSelected,
+      setRunning: vi.fn(),
+      clearAllRunning: vi.fn(),
+      syncCueDuration: vi.fn(),
+    })
+
+    runner.go()
+    expect(setSelected).toHaveBeenCalledWith('next')
   })
 })
