@@ -6,33 +6,34 @@ import { Inspector } from './components/inspector/Inspector'
 import { WaveformPanel } from './components/waveform/WaveformPanel'
 import { TimelineEditor } from './components/timeline/TimelineEditor'
 import { SettingsDialog } from './components/layout/SettingsDialog'
-import { useSelectedCue, useParentGroup } from './store'
+import { useSelectedCue } from './store'
 import type { GroupCue } from './types/cue'
 import './App.css'
 
 export function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [timelineExpanded, setTimelineExpanded] = useState(false)
   const selected = useSelectedCue()
-  const parentGroup = useParentGroup(selected?.id ?? '')
 
-  // Stay in timeline mode when the group itself OR any of its children is selected
-  const timelineGroupCue = (
-    selected?.type === 'group' && (selected as GroupCue).mode === 'timeline'
-      ? selected as GroupCue
-      : parentGroup?.mode === 'timeline'
-        ? parentGroup
-        : null
-  )
+  const timelineGroupCue = selected?.type === 'group' && (selected as GroupCue).mode === 'timeline'
+    ? selected as GroupCue
+    : null
+
+  const shellClass = `app-shell${timelineExpanded && timelineGroupCue ? ' timeline-fullscreen' : ''}`
 
   return (
-    <div className="app-shell">
+    <div className={shellClass}>
       <Toolbar onOpenSettings={() => setSettingsOpen(true)} />
       <div className="app-main">
         <CueList />
         <Inspector />
       </div>
       {timelineGroupCue
-        ? <TimelineEditor cue={timelineGroupCue} />
+        ? <TimelineEditor
+            cue={timelineGroupCue}
+            expanded={timelineExpanded}
+            onToggleExpand={() => setTimelineExpanded(e => !e)}
+          />
         : <WaveformPanel />
       }
       <TransportBar />

@@ -165,6 +165,10 @@ html, body, #root {
   overflow: hidden;
 }
 
+/* Timeline fullscreen mode */
+.app-shell.timeline-fullscreen .app-main { display: none; }
+.app-shell.timeline-fullscreen .timeline-panel { flex: 1; height: auto; }
+
 ::-webkit-scrollbar { width: var(--scrollbar-width); }
 ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
 ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: var(--radius-md); }

@@ -6,10 +6,9 @@ import './TimelineEditor.css'
 const RULER_H = 22
 const ROW_H = 28
 const ROW_GAP = 2
-const LABEL_W = 104
 const MIN_BLOCK_W = 8
 const ZOOM_LEVELS = [5, 10, 25, 50, 100, 200, 400, 800]
-const DEFAULT_ZOOM = 100
+const DEFAULT_ZOOM = 5
 
 const TICK_CANDIDATES_MS = [50, 100, 250, 500, 1000, 2000, 5000, 10000, 30000, 60000]
 
@@ -60,19 +59,30 @@ function pickTickMs(pxPerMs: number): number {
 
 interface Props {
   cue: GroupCue
+  expanded: boolean
+  onToggleExpand: () => void
 }
 
-export function TimelineEditor({ cue }: Props) {
+export function TimelineEditor({ cue, expanded, onToggleExpand }: Props) {
   const cues = useStore(s => s.cues)
   const running = useStore(s => s.running)
   const updateCue = useStore(s => s.updateCue)
   const select = useStore(s => s.select)
-  const selectedId = useStore(s => s.selectedId)
 
   const [zoom, setZoom] = useState(DEFAULT_ZOOM)
   const pxPerMs = zoom / 1000
 
+  // Local active block — decoupled from global selection so dragging doesn't change selectedId
+  const [activeBlockId, setActiveBlockId] = useState<string | null>(null)
+
   const children = cues.filter(c => c.parentId === cue.id)
+
+  // Clear active block if child was removed
+  useEffect(() => {
+    if (activeBlockId && !children.find(c => c.id === activeBlockId)) {
+      setActiveBlockId(null)
+    }
+  }, [children, activeBlockId])
 
   const contentEndMs = Math.max(
     5000,
@@ -100,15 +110,15 @@ export function TimelineEditor({ cue }: Props) {
     return () => { if (rafRef.current !== null) cancelAnimationFrame(rafRef.current) }
   }, [groupRunState])
 
-  // Drag
+  // Drag — uses pointer capture; never changes global selection
   const dragRef = useRef<{ cueId: string; startX: number; startOffset: number } | null>(null)
 
   const onBlockPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>, child: Cue) => {
     e.currentTarget.setPointerCapture(e.pointerId)
     dragRef.current = { cueId: child.id, startX: e.clientX, startOffset: child.timelineOffset }
-    select(child.id)
+    setActiveBlockId(child.id)
     e.preventDefault()
-  }, [select])
+  }, [])
 
   const onBlockPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (!dragRef.current) return
@@ -135,18 +145,18 @@ export function TimelineEditor({ cue }: Props) {
   const ticks: number[] = []
   for (let t = 0; t <= contentEndMs + tickMs; t += tickMs) ticks.push(t)
 
-  const selectedChild = children.find(c => c.id === selectedId)
+  const activeChild = children.find(c => c.id === activeBlockId)
   const totalH = RULER_H + children.length * (ROW_H + ROW_GAP)
 
   return (
-    <div className="timeline-panel">
+    <div className="timeline-panel" data-expanded={expanded}>
       <div className="timeline-header">
         <span className="tl-title">{cue.name || 'Timeline'}</span>
-        {selectedChild && (
+        {activeChild && (
           <span className="tl-selection-info">
-            {selectedChild.name || selectedChild.type}
+            {activeChild.name || activeChild.type}
             {' — '}
-            {fmtTime(selectedChild.timelineOffset)}
+            {fmtTime(activeChild.timelineOffset)}
           </span>
         )}
         <div className="tl-zoom-controls">
@@ -154,6 +164,13 @@ export function TimelineEditor({ cue }: Props) {
           <span className="tl-zoom-label">{zoom}px/s</span>
           <button className="tl-zoom-btn" onClick={zoomIn} disabled={zoom >= ZOOM_LEVELS[ZOOM_LEVELS.length - 1]}>+</button>
         </div>
+        <button
+          className="tl-expand-btn"
+          onClick={onToggleExpand}
+          title={expanded ? 'Collapse timeline' : 'Expand timeline'}
+        >
+          <span className={`tl-chevron${expanded ? ' tl-chevron-down' : ''}`} />
+        </button>
       </div>
 
       {children.length === 0 ? (
@@ -166,7 +183,7 @@ export function TimelineEditor({ cue }: Props) {
               <div
                 key={child.id}
                 className="tl-row-label"
-                data-selected={child.id === selectedId}
+                data-active={child.id === activeBlockId}
                 style={{ height: ROW_H, marginBottom: ROW_GAP }}
                 onClick={() => select(child.id)}
               >
@@ -195,7 +212,7 @@ export function TimelineEditor({ cue }: Props) {
                   >
                     <div
                       className="tl-block"
-                      data-selected={child.id === selectedId}
+                      data-active={child.id === activeBlockId}
                       style={{
                         left: child.timelineOffset * pxPerMs,
                         width: blockW,
