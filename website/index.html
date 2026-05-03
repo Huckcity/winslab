@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Winslab - Show Control for Windows</title>
+  <meta name="description" content="Winslab documentation for building and running cue-based shows on Windows." />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#top" aria-label="Winslab home">
+        <img src="./assets/logo-mark.svg" alt="Winslab" class="brand-mark" />
+        <span>WINSLAB</span>
+      </a>
+      <nav class="top-nav" aria-label="Primary">
+        <a href="#download">Download</a>
+        <a href="#quickstart">Quick Start</a>
+        <a href="#workflow">Workflow</a>
+        <a href="#cue-types">Cue Types</a>
+        <a href="#transport">Transport</a>
+        <a href="#cheat-sheet">Cheat Sheet</a>
+        <a href="#changelog">Changelog</a>
+      </nav>
+      <a class="donate-btn" href="https://www.paypal.com/donate/?hosted_button_id=REPLACE_ME" target="_blank" rel="noreferrer">Say Thanks on PayPal</a>
+    </div>
+  </header>
+
+  <main id="top" class="layout">
+    <section class="hero panel reveal">
+      <img src="./assets/logo-horizontal.svg" alt="Winslab logo" class="hero-logo" />
+      <h1>Professional show control for Windows.</h1>
+      <p>
+        Build cue stacks. Trigger audio, MIDI, OSC, waits, fades, groups, and stop actions with predictable timing.
+        Winslab is designed for live operation: fast setup, low friction editing, and clear run-state visibility.
+      </p>
+      <div class="hero-actions">
+        <a class="action action-primary" href="#quickstart">Start Using Winslab</a>
+        <a class="action action-ghost" href="#faq">Read Troubleshooting</a>
+      </div>
+      <p class="hero-note">Minimal pitch, maximum utility. If Winslab helps your show, use the PayPal button above to support development.</p>
+    </section>
+
+    <section id="download" class="panel reveal delay-1">
+      <h2>Download</h2>
+      <p>Get the latest build for your platform from your release channel.</p>
+      <div class="cards two-col">
+        <article class="card">
+          <h3>Windows Installer</h3>
+          <p>Standard operator install with desktop/start menu shortcuts.</p>
+          <a class="action action-ghost" href="#" aria-label="Download Windows build">Download .exe</a>
+        </article>
+        <article class="card">
+          <h3>macOS Build</h3>
+          <p>Cross-platform package for testing and production show prep.</p>
+          <a class="action action-ghost" href="#" aria-label="Download macOS build">Download .dmg</a>
+        </article>
+      </div>
+      <p class="hero-note">Replace the two links above with your real release URLs.</p>
+    </section>
+
+    <section id="quickstart" class="panel reveal delay-1">
+      <h2>Quick Start</h2>
+      <ol class="steps">
+        <li>Launch Winslab and create a workspace from WinsLab > New.</li>
+        <li>Add cues from the toolbar: Audio, Group, Fade, Wait, Stop, or More for MIDI / OSC / Network / Script.</li>
+        <li>For audio, drag files directly into the cue list to auto-create cues.</li>
+        <li>Select a cue to edit it in the Inspector panel.</li>
+        <li>Press GO to run the selected cue and advance through your show.</li>
+      </ol>
+    </section>
+
+    <section id="cue-types" class="panel reveal delay-3">
+      <h2>Cue Types</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Use Case</th>
+              <th>Key Fields</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Audio</td><td>Play sound files</td><td>file, level, pan, fades, loop</td></tr>
+            <tr><td>MIDI</td><td>Send MIDI messages</td><td>port, message list</td></tr>
+            <tr><td>OSC</td><td>Control network devices/apps</td><td>host, port, address, args</td></tr>
+            <tr><td>Wait</td><td>Pause timeline progression</td><td>duration</td></tr>
+            <tr><td>Fade</td><td>Ramp target cue parameter</td><td>target cue, property, curve, duration</td></tr>
+            <tr><td>Stop</td><td>Stop one cue or all cues</td><td>target, optional fade out</td></tr>
+            <tr><td>Group</td><td>Organize and trigger children</td><td>mode, child cues</td></tr>
+            <tr><td>Network</td><td>HTTP style trigger cues</td><td>method, URL, body, headers</td></tr>
+            <tr><td>Script</td><td>Custom scripted action</td><td>language, script body</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="transport" class="panel reveal delay-3">
+      <h2>Transport and Hotkeys</h2>
+      <div class="cards three-col">
+        <article class="card state-go">
+          <h3>GO</h3>
+          <p>Runs the selected cue. Advances selection according to timing and cue rules.</p>
+        </article>
+        <article class="card state-stop">
+          <h3>STOP</h3>
+          <p>Stops selected running cue context, depending on cue type and runtime state.</p>
+        </article>
+        <article class="card state-panic">
+          <h3>PANIC</h3>
+          <p>Immediate safety action. Stops all audio and clears active playback quickly.</p>
+        </article>
+      </div>
+      <div class="kbd-grid">
+        <div><kbd>Space</kbd><span>GO</span></div>
+        <div><kbd>Esc</kbd><span>STOP</span></div>
+        <div><kbd>Shift</kbd> + <kbd>Esc</kbd><span>PANIC</span></div>
+      </div>
+    </section>
+
+    <section id="changelog" class="panel reveal delay-4">
+      <h2>Changelog</h2>
+      <div class="changelog-list">
+        <article class="card">
+          <h3>v0.1.0 - 2026-05-03</h3>
+          <ul class="tight-list">
+            <li>Initial public documentation site.</li>
+            <li>Added operator workflow, cue type reference, and transport behavior docs.</li>
+            <li>Added PayPal thank-you donation call to action.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Template For Next Release</h3>
+          <ul class="tight-list">
+            <li>List operator-visible changes first.</li>
+            <li>Call out migration or setup updates.</li>
+            <li>Include any changed hotkeys or cue behavior.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>Winslab documentation artifact. Keep this page in sync with runtime behavior as features evolve.</p>
+  </footer>
+</body>
+</html>
