@@ -3,7 +3,7 @@ name: Build
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
 
 jobs:
@@ -43,7 +43,7 @@ jobs:
         run: npm run test:e2e
 
   build-windows:
-    needs: [test, test-e2e]
+    needs: [ test, test-e2e ]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -67,7 +67,7 @@ jobs:
           retention-days: 30
 
   build-mac:
-    needs: [test, test-e2e]
+    needs: [ test, test-e2e ]
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -91,7 +91,7 @@ jobs:
           retention-days: 30
 
   release:
-    needs: [build-windows, build-mac]
+    needs: [ build-windows, build-mac ]
     runs-on: ubuntu-latest
     permissions:
       contents: write
