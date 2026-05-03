@@ -29,8 +29,11 @@ export function useCueRunner() {
 export function useKeyboard(go: () => void, stop: () => void, panic: () => void) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+      const el = e.target as HTMLElement
+      const tag = el?.tagName
+      const isTextInput = (tag === 'INPUT' && (el as HTMLInputElement).type !== 'range') ||
+        tag === 'TEXTAREA' || tag === 'SELECT'
+      if (isTextInput) return
       if (e.code === 'Space' && !e.shiftKey) { e.preventDefault(); go() }
       if (e.code === 'Escape' && e.shiftKey) { e.preventDefault(); panic() }
       if (e.code === 'Escape' && !e.shiftKey) { e.preventDefault(); stop() }
