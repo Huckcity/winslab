@@ -11,6 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "electron-vite build && playwright test",
+    "test:e2e:headed": "electron-vite build && playwright test --headed",
     "dist": "electron-vite build && electron-builder",
     "dist:win": "electron-vite build && electron-builder --win",
     "dist:mac": "electron-vite build && electron-builder --mac",
@@ -29,11 +31,26 @@
       "!out/**/*.map"
     ],
     "win": {
-      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "icon": "resources/icon.ico"
     },
     "mac": {
-      "target": [{ "target": "dmg", "arch": ["x64", "arm64"] }],
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
       "icon": "resources/icon.icns",
       "category": "public.app-category.music"
     },
@@ -55,6 +72,7 @@
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/tsconfig": "^2.0.0",
     "@electron-toolkit/utils": "^3.0.0",
+    "@playwright/test": "^1.59.1",
     "@tanstack/react-virtual": "^3.10.7",
     "@types/node": "^22.9.1",
     "@types/react": "^18.3.12",
