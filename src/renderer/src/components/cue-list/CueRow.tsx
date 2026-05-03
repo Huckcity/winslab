@@ -37,9 +37,11 @@ interface Props {
   collapsed?: boolean
   onToggleCollapse?: () => void
   onClick: () => void
+  onContextMenu: (e: React.MouseEvent, id: string) => void
+  renamingId: string | null
 }
 
-export function CueRow({ cue, depth, isSelected, runState, collapsed, onToggleCollapse, onClick }: Props) {
+export function CueRow({ cue, depth, isSelected, runState, collapsed, onToggleCollapse, onClick, onContextMenu, renamingId }: Props) {
   const updateCue = useStore(s => s.updateCue)
   const [editing, setEditing] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -78,6 +80,13 @@ export function CueRow({ cue, depth, isSelected, runState, collapsed, onToggleCo
     setEditing(false)
   }
 
+  useEffect(() => {
+    if (renamingId === cue.id) {
+      setEditing(true)
+      setTimeout(() => inputRef.current?.select(), 0)
+    }
+  }, [renamingId, cue.id])
+
   const isGroup = cue.type === 'group'
   const isRunning = runState !== null
 
@@ -90,6 +99,7 @@ export function CueRow({ cue, depth, isSelected, runState, collapsed, onToggleCo
       data-depth={depth}
       onClick={onClick}
       onDoubleClick={startEdit}
+      onContextMenu={e => { e.preventDefault(); onContextMenu(e, cue.id) }}
     >
       <span className="col-num">
         {isGroup ? (

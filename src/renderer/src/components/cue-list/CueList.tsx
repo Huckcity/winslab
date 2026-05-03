@@ -3,6 +3,7 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import { useStore } from '../../store'
 import type { GroupCue } from '../../types/cue'
 import { CueRow } from './CueRow'
+import { CueContextMenu } from './CueContextMenu'
 import './CueList.css'
 
 const AUDIO_EXTENSIONS = new Set(['.mp3', '.wav', '.wave', '.aiff', '.aif', '.flac', '.ogg', '.m4a', '.aac', '.opus', '.wma'])
@@ -61,6 +62,18 @@ export function CueList() {
 
   // Collapse state is local UI state — not persisted to workspace
   const [collapsedGroupIds, setCollapsedGroupIds] = useState<Set<string>>(new Set())
+
+  // Context menu state
+  const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; cueId: string } | null>(null)
+  const [renamingId, setRenamingId] = useState<string | null>(null)
+
+  const openCtxMenu = useCallback((e: React.MouseEvent, cueId: string) => {
+    e.preventDefault()
+    select(cueId)
+    setCtxMenu({ x: e.clientX, y: e.clientY, cueId })
+  }, [select])
+
+  const closeCtxMenu = useCallback(() => setCtxMenu(null), [])
 
   const toggleCollapse = useCallback((id: string) => {
     setCollapsedGroupIds(prev => {
@@ -244,6 +257,10 @@ export function CueList() {
   // ── Keyboard ──────────────────────────────────────────────────────────────
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      if (ctxMenu) { closeCtxMenu(); return }
+    }
+
     const renderIdx = renderItems.findIndex(item => item.cue.id === selectedId)
 
     if (e.key === 'ArrowDown' && renderIdx < renderItems.length - 1) {
@@ -255,7 +272,7 @@ export function CueList() {
     } else if (e.key === 'd' && e.metaKey) {
       if (selectedId) duplicateCue(selectedId)
     }
-  }, [renderItems, selectedId, select, removeCue, duplicateCue])
+  }, [renderItems, selectedId, select, removeCue, duplicateCue, ctxMenu, closeCtxMenu])
 
   // ── Drop indicator ────────────────────────────────────────────────────────
 
@@ -306,6 +323,7 @@ export function CueList() {
         className="cue-list-scroll"
         onDragOver={handleScrollDragOver}
         onDrop={handleReorderDrop}
+        onScroll={() => ctxMenu && closeCtxMenu()}
       >
         <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
           {virtualizer.getVirtualItems().map(item => {
@@ -331,6 +349,8 @@ export function CueList() {
                   collapsed={collapsed}
                   onToggleCollapse={cue.type === 'group' ? () => toggleCollapse(cue.id) : undefined}
                   onClick={() => select(cue.id)}
+                  onContextMenu={openCtxMenu}
+                  renamingId={renamingId}
                 />
               </div>
             )
@@ -353,6 +373,21 @@ export function CueList() {
           Drop audio files to create cues
         </div>
       )}
+      {ctxMenu && (() => {
+        const ctxCue = cues.find(c => c.id === ctxMenu.cueId)
+        return ctxCue ? (
+          <CueContextMenu
+            x={ctxMenu.x}
+            y={ctxMenu.y}
+            cue={ctxCue}
+            onClose={closeCtxMenu}
+            onRename={() => {
+              setRenamingId(ctxMenu.cueId)
+              setTimeout(() => setRenamingId(null), 100)
+            }}
+          />
+        ) : null
+      })()}
     </div>
   )
 }
