@@ -305,6 +305,25 @@ describe('CueRunner — timeline group mode', () => {
     )
   })
 
+  it('seek while playing: group running state is cleared when all children finish after seek', () => {
+    const group = makeGroup('g1')
+    const w1 = makeWait('w1', 'g1', { duration: 1000, timelineOffset: 0 })
+    const w2 = makeWait('w2', 'g1', { duration: 1000, timelineOffset: 2000 })
+    const { runner, setRunning } = setup([group, w1, w2])
+
+    runner.go()
+    vi.advanceTimersByTime(500) // group playing, w1 in progress, w2 not yet started
+
+    // Seek to 500ms: w1 has 500ms remaining; w2 starts at 1500ms from now, lasts 1000ms more
+    runner.seekTimeline('g1', 500)
+    vi.advanceTimersByTime(500)  // w1 finishes (500ms remaining from seek)
+    vi.advanceTimersByTime(2000) // w2 :timeline fires at +1500ms, w2 wait finishes at +2500ms
+    vi.runAllTimers()            // flush 0ms post-wait chains
+
+    // After all children done, group running state must be null
+    expect(setRunning).toHaveBeenLastCalledWith('g1', null)
+  })
+
   it('getGroupStartOffset returns 0 when no seek set', () => {
     const group = makeGroup('g1')
     const { runner } = setup([group])

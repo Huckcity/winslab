@@ -69,7 +69,7 @@ export class CueRunner {
 
     this.fireCue(cue, () => {
       if (cue.advance === 'on-end' && nextCue) {
-        setTimeout(() => this.goById(nextCue.id), cue.postWait)
+        this.goById(nextCue.id)
       }
     })
 
@@ -87,7 +87,7 @@ export class CueRunner {
     const nextCue = cues[idx + 1] ?? null
     this.fireCue(cue, () => {
       if (cue.advance === 'on-end' && nextCue) {
-        setTimeout(() => this.goById(nextCue.id), cue.postWait)
+        this.goById(nextCue.id)
       }
     })
   }
@@ -313,8 +313,14 @@ export class CueRunner {
     )
     if (wasPlaying) {
       this.stop(groupId)
-      const armedChildren = children.filter(c => c.isArmed)
-      this.executeGroupTimeline(group as GroupCue, armedChildren, () => {}, seekMs)
+      const { setRunning } = this.deps!
+      const groupCue = group as GroupCue
+      // groupStartOffsets already has seekMs — execute() → executeGroup() will read + consume it
+      this.execute(groupCue, () => {
+        setRunning(groupId, { cueId: groupId, state: 'post-wait', startedAt: Date.now(), progress: 1 })
+        const t = setTimeout(() => { setRunning(groupId, null) }, groupCue.postWait)
+        this.timers.set(groupId + ':post', t)
+      })
     }
   }
 
