@@ -3,6 +3,14 @@ import type { Workspace } from '../renderer/src/types/workspace'
 
 contextBridge.exposeInMainWorld('winslab', {
   getPathForFile: (file: File): string => webUtils.getPathForFile(file),
+  app: {
+    onCloseRequested: (callback: () => void): (() => void) => {
+      const listener = () => callback()
+      ipcRenderer.on('app:close-requested', listener)
+      return () => ipcRenderer.off('app:close-requested', listener)
+    },
+    confirmClose: (): Promise<void> => ipcRenderer.invoke('app:confirm-close')
+  },
   audio: {
     readFile: (filePath: string): Promise<ArrayBuffer> =>
       ipcRenderer.invoke('audio:readFile', filePath),

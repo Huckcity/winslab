@@ -5,6 +5,10 @@ import type { Workspace } from './types/workspace'
 
 interface WinslabBridge {
   getPathForFile: (file: File) => string
+  app: {
+    onCloseRequested: (callback: () => void) => () => void
+    confirmClose: () => Promise<void>
+  }
   audio: {
     readFile: (filePath: string) => Promise<ArrayBuffer>
     pickFile: () => Promise<string | null>

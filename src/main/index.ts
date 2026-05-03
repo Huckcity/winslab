@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, shell, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerIpcHandlers } from './ipc/handlers'
@@ -15,6 +15,21 @@ function createWindow(): void {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
     }
+  })
+
+  // Intercept close and ask the renderer to run the dirty check.
+  // The renderer calls app:confirm-close when it's safe to proceed.
+  let allowClose = false
+  win.on('close', (event) => {
+    if (allowClose) return
+    event.preventDefault()
+    win.webContents.send('app:close-requested')
+  })
+
+  ipcMain.removeHandler('app:confirm-close')
+  ipcMain.handle('app:confirm-close', () => {
+    allowClose = true
+    win.close()
   })
 
   win.on('ready-to-show', () => win.show())

@@ -24,15 +24,6 @@ export function useWorkspace() {
     window.winslab.workspace.setTitle(title)
   }, [workspaceName, isDirty])
 
-  // Warn on browser close if dirty (Electron will also catch window-close events)
-  useEffect(() => {
-    const handler = (e: BeforeUnloadEvent) => {
-      if (isDirty) e.preventDefault()
-    }
-    window.addEventListener('beforeunload', handler)
-    return () => window.removeEventListener('beforeunload', handler)
-  }, [isDirty])
-
   const guardDirty = useCallback(async (): Promise<boolean> => {
     if (!isDirty) return true
     const response = await window.winslab.workspace.confirmClose(workspaceName)
@@ -45,6 +36,15 @@ export function useWorkspace() {
     }
     return true
   }, [isDirty, workspaceName, workspacePath, cues, saveSucceeded])
+
+  // When the main process intercepts the OS close button, run the dirty check.
+  useEffect(() => {
+    const off = window.winslab.app.onCloseRequested(async () => {
+      const canClose = await guardDirty()
+      if (canClose) window.winslab.app.confirmClose()
+    })
+    return off
+  }, [guardDirty])
 
   const newWorkspace = useCallback(async () => {
     if (!await guardDirty()) return
