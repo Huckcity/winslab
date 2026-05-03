@@ -47,6 +47,30 @@ test('timeline ruler is visible', async () => {
   await expect(page.locator('.tl-ruler')).toBeVisible()
 })
 
+test('clicking the ruler sets the amber cursor (playhead appears)', async () => {
+  // No cursor yet — playhead should not be in the DOM
+  await expect(page.locator('.tl-playhead')).not.toBeVisible()
+
+  await page.locator('.tl-ruler').click({ position: { x: 50, y: 11 } })
+  await expect(page.locator('.tl-playhead')).toBeVisible()
+  // data-live=false means it is the amber cursor, not the live playback head
+  await expect(page.locator('.tl-playhead')).toHaveAttribute('data-live', 'false')
+})
+
+test('navigating away from the group clears the amber cursor', async () => {
+  // cursor is set from the previous test
+  await expect(page.locator('.tl-playhead')).toBeVisible()
+
+  // click the child cue — timeline panel hides (child is not a timeline group)
+  await page.locator('.cue-row[data-depth="1"]').click()
+  await expect(page.locator('.timeline-panel')).not.toBeVisible()
+
+  // return to the group — cursor should be gone
+  await page.locator('.cue-row[data-depth="0"]').click()
+  await expect(page.locator('.timeline-panel')).toBeVisible()
+  await expect(page.locator('.tl-playhead')).not.toBeVisible()
+})
+
 test('switching back to sequence mode hides the timeline editor', async () => {
   await page.locator('.inspector-tab', { hasText: 'Group' }).click()
   const modeSelect = page.locator('.inspector select')

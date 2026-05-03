@@ -99,10 +99,11 @@ export function TimelineEditor({ cue, expanded, onToggleExpand }: Props) {
     }
   }, [children, activeBlockId])
 
-  // Sync cursor to stored seek offset when switching between groups
+  // Sync cursor when switching groups; clear stored offset when navigating away
   useEffect(() => {
     const offset = cueRunner.getGroupStartOffset(cue.id)
     setCursorMs(offset > 0 ? offset : null)
+    return () => { cueRunner.clearGroupStartOffset(cue.id) }
   }, [cue.id])
 
   const contentEndMs = Math.max(

@@ -293,6 +293,10 @@ export class CueRunner {
     return this.groupStartOffsets.get(groupId) ?? 0
   }
 
+  clearGroupStartOffset(groupId: string): void {
+    this.groupStartOffsets.delete(groupId)
+  }
+
   seekTimeline(groupId: string, seekMs: number): void {
     this.groupStartOffsets.set(groupId, seekMs)
     const cues = this.deps!.getCues()
