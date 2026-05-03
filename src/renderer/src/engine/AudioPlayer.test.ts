@@ -48,7 +48,7 @@ import type { AudioCue } from '../types/cue'
 function makeAudioCue(overrides: Partial<AudioCue> = {}): AudioCue {
   return {
     id: 'a1', number: '1', name: 'Audio', type: 'audio',
-    colorLabel: 'none', parentId: null, preWait: 0, postWait: 0, duration: 0,
+    colorLabel: 'none', parentId: null, preWait: 0, postWait: 0, timelineOffset: 0, duration: 0,
     advance: 'none', isArmed: true, notes: '',
     filePath: '/test.mp3', startTime: 0, endTime: null,
     fadeInDuration: 0, fadeOutDuration: 0,

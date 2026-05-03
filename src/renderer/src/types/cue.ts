@@ -9,6 +9,7 @@ export interface CueBase {
   parentId: string | null
   preWait: number
   postWait: number
+  timelineOffset: number
   duration: number
   advance: 'none' | 'on-start' | 'on-end'
   isArmed: boolean
@@ -82,7 +83,7 @@ export interface StopCue extends CueBase {
   fadeOutDuration: number
 }
 
-export type GroupMode = 'playlist' | 'random' | 'sequence'
+export type GroupMode = 'playlist' | 'random' | 'sequence' | 'timeline'
 
 export interface GroupCue extends CueBase {
   type: 'group'

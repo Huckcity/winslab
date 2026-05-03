@@ -108,6 +108,7 @@
   --h-transport:        52px;
   --h-waveform:        110px;
   --h-waveform-header:  24px;
+  --h-timeline:        200px;
   --h-button-sm:        26px;
   --h-button-md:        28px;
   --h-button-lg:        36px;
@@ -163,6 +164,10 @@ html, body, #root {
   min-height: 0;
   overflow: hidden;
 }
+
+/* Timeline fullscreen mode */
+.app-shell.timeline-fullscreen .app-main { display: none; }
+.app-shell.timeline-fullscreen .timeline-panel { flex: 1; height: auto; }
 
 ::-webkit-scrollbar { width: var(--scrollbar-width); }
 ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
