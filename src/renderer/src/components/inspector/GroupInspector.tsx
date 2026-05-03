@@ -15,6 +15,7 @@ export function GroupInspector({ cue }: Props) {
           <option value="sequence">Sequence — run all in order</option>
           <option value="playlist">Playlist — advance manually</option>
           <option value="random">Random — pick one at random</option>
+          <option value="timeline">Timeline — position by offset</option>
         </select>
       </div>
       <p className="inspector-hint">

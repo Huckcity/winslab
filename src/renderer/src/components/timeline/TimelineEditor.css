@@ -1,0 +1,210 @@
+.timeline-panel {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: var(--h-timeline);
+  background: var(--bg-well);
+  border-top: 1px solid var(--border-soft);
+}
+
+.timeline-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-3);
+  height: var(--h-waveform-header);
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--bg-surface);
+}
+
+.tl-title {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-medium);
+  color: var(--fg-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.tl-selection-info {
+  font-size: var(--text-sm);
+  color: var(--accent-amber);
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.tl-zoom-controls {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.tl-zoom-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  color: var(--fg-secondary);
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+.tl-zoom-btn:hover:not(:disabled) { background: var(--bg-hover); color: var(--fg-primary); }
+.tl-zoom-btn:disabled { opacity: 0.3; cursor: default; }
+
+.tl-zoom-label {
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 48px;
+  text-align: center;
+}
+
+.tl-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-sm);
+  color: var(--fg-ghost);
+}
+
+/* ── Two-pane layout ── */
+
+.tl-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.tl-labels-col {
+  flex-shrink: 0;
+  width: 104px;
+  border-right: 1px solid var(--border-soft);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.tl-corner {
+  flex-shrink: 0;
+  background: var(--bg-well);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.tl-row-label {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: none;
+  transition: var(--transition-fast);
+  border-bottom: 1px solid var(--border-soft);
+}
+.tl-row-label[data-selected='true'] {
+  color: var(--fg-primary);
+  background: var(--bg-selected);
+}
+.tl-row-label:hover:not([data-selected='true']) {
+  color: var(--fg-secondary);
+  background: var(--bg-hover);
+}
+
+.tl-tracks-outer {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* ── Track content ── */
+
+.tl-tracks-inner {
+  position: relative;
+}
+
+.tl-ruler {
+  position: relative;
+  background: var(--bg-well);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.tl-tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid var(--border-soft);
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 3px;
+}
+
+.tl-tick-label {
+  font-size: var(--text-xs);
+  color: var(--fg-ghost);
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+  padding-left: 3px;
+  white-space: nowrap;
+}
+
+.tl-row {
+  position: relative;
+  background: var(--bg-base);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.tl-block {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  opacity: 0.85;
+  transition: opacity 0.1s;
+  min-width: 8px;
+}
+.tl-block:hover { opacity: 1; }
+.tl-block[data-selected='true'] {
+  opacity: 1;
+  box-shadow: 0 0 0 2px var(--accent-blue);
+}
+.tl-block:active { cursor: grabbing; }
+
+.tl-block-label {
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+  user-select: none;
+}
+
+.tl-playhead {
+  position: absolute;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--accent-blue);
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 10;
+}

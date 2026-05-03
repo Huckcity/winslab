@@ -19,7 +19,7 @@ vi.mock('./AudioPlayer', () => ({
 function makeWait(overrides: Partial<WaitCue> = {}): WaitCue {
   return {
     id: 'w1', number: '1', name: 'Wait', type: 'wait',
-    colorLabel: 'none', parentId: null, preWait: 0, postWait: 0, duration: 1000,
+    colorLabel: 'none', parentId: null, preWait: 0, postWait: 0, timelineOffset: 0, duration: 1000,
     advance: 'none', isArmed: true, notes: '',
     ...overrides
   }
@@ -28,7 +28,7 @@ function makeWait(overrides: Partial<WaitCue> = {}): WaitCue {
 function makeAudio(overrides: Partial<AudioCue> = {}): AudioCue {
   return {
     id: 'a1', number: '1', name: 'Audio', type: 'audio',
-    colorLabel: 'none', parentId: null, preWait: 0, postWait: 0, duration: 0,
+    colorLabel: 'none', parentId: null, preWait: 0, postWait: 0, timelineOffset: 0, duration: 0,
     advance: 'none', isArmed: true, notes: '',
     filePath: '/test.mp3', startTime: 0, endTime: null,
     fadeInDuration: 0, fadeOutDuration: 0,

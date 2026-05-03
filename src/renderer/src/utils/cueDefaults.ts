@@ -16,6 +16,7 @@ function base(name: string): Omit<Cue, 'type'> {
     parentId: null,
     preWait: 0,
     postWait: 0,
+    timelineOffset: 0,
     duration: 0,
     advance: 'none',
     isArmed: true,

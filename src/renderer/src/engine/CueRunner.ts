@@ -198,7 +198,19 @@ export class CueRunner {
 
     if (children.length === 0) { onDone(); return }
 
-    if (cue.mode === 'random') {
+    if (cue.mode === 'timeline') {
+      let remaining = children.length
+      for (const child of children) {
+        const t = setTimeout(() => {
+          this.timers.delete(child.id + ':timeline')
+          this.fireCue(child, () => {
+            remaining--
+            if (remaining === 0) onDone()
+          })
+        }, child.timelineOffset)
+        this.timers.set(child.id + ':timeline', t)
+      }
+    } else if (cue.mode === 'random') {
       this.fireCue(children[Math.floor(Math.random() * children.length)], onDone)
     } else {
       // sequence and playlist both run children in order
@@ -223,12 +235,27 @@ export class CueRunner {
   private hasActiveTimers(cueId: string): boolean {
     return this.timers.has(cueId + ':pre') ||
            this.timers.has(cueId + ':post') ||
-           this.timers.has(cueId)
+           this.timers.has(cueId) ||
+           this.timers.has(cueId + ':timeline')
   }
 
   stop(cueId?: string): void {
     const { setRunning, clearAllRunning } = this.deps!
     if (cueId) {
+      // For timeline groups, cancel all pending child offset timers and stop active children
+      const cues = this.deps!.getCues()
+      const cue = cues.find(c => c.id === cueId)
+      if (cue?.type === 'group' && cue.mode === 'timeline') {
+        for (const child of cues.filter(c => c.parentId === cueId)) {
+          clearTimeout(this.timers.get(child.id + ':timeline'))
+          this.timers.delete(child.id + ':timeline')
+          clearTimeout(this.timers.get(child.id + ':pre'))
+          clearTimeout(this.timers.get(child.id + ':post'))
+          clearTimeout(this.timers.get(child.id))
+          audioPlayer.stop(child.id)
+          setRunning(child.id, null)
+        }
+      }
       clearTimeout(this.timers.get(cueId + ':pre'))
       clearTimeout(this.timers.get(cueId + ':post'))
       clearTimeout(this.timers.get(cueId))

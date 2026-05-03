@@ -16,12 +16,12 @@ function resetStore() {
 const fakeCues: Cue[] = [
   {
     id: 'c1', number: '1', name: 'House to half', type: 'wait',
-    colorLabel: 'orange', parentId: null, preWait: 0, postWait: 0, duration: 3000,
+    colorLabel: 'orange', parentId: null, preWait: 0, postWait: 0, timelineOffset: 0, duration: 3000,
     advance: 'none', isArmed: true, notes: ''
   },
   {
     id: 'c2', number: '2', name: 'Scene 1 music', type: 'wait',
-    colorLabel: 'none', parentId: null, preWait: 0, postWait: 0, duration: 5000,
+    colorLabel: 'none', parentId: null, preWait: 0, postWait: 0, timelineOffset: 0, duration: 5000,
     advance: 'none', isArmed: true, notes: ''
   }
 ]

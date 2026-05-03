@@ -10,7 +10,7 @@ vi.mock('./AudioPlayer', () => ({
 function makeGroup(id: string, overrides: Partial<GroupCue> = {}): GroupCue {
   return {
     id, number: id, name: id, type: 'group',
-    colorLabel: 'none', parentId: null, preWait: 0, postWait: 0, duration: 0,
+    colorLabel: 'none', parentId: null, preWait: 0, postWait: 0, timelineOffset: 0, duration: 0,
     advance: 'none', isArmed: true, notes: '',
     mode: 'sequence',
     ...overrides
@@ -20,7 +20,7 @@ function makeGroup(id: string, overrides: Partial<GroupCue> = {}): GroupCue {
 function makeWait(id: string, parentId: string | null, overrides: Partial<WaitCue> = {}): WaitCue {
   return {
     id, number: id, name: id, type: 'wait',
-    colorLabel: 'none', parentId, preWait: 0, postWait: 0, duration: 100,
+    colorLabel: 'none', parentId, preWait: 0, postWait: 0, timelineOffset: 0, duration: 100,
     advance: 'none', isArmed: true, notes: '',
     ...overrides
   }

@@ -8,6 +8,7 @@ function migrateCue(cue: Cue & Record<string, unknown>): Cue {
   if (cue.advance === undefined) cue.advance = 'none'
   if (cue.preWait === undefined) cue.preWait = 0
   if (cue.postWait === undefined) cue.postWait = 0
+  if (cue.timelineOffset === undefined) cue.timelineOffset = 0
   if (cue.colorLabel === undefined) cue.colorLabel = 'none'
   if (cue.isArmed === undefined) cue.isArmed = true
   if (cue.notes === undefined) cue.notes = ''
