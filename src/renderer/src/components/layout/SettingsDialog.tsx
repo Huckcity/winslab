@@ -37,7 +37,7 @@ export function SettingsDialog({ onClose }: Props) {
       <div className="settings-dialog" role="dialog" aria-modal="true" aria-label="Settings">
         <div className="settings-header">
           <span className="settings-title">Settings</span>
-          <button className="settings-close" onClick={onClose} aria-label="Close">✕</button>
+          <button className="settings-close" onClick={onClose} aria-label="Dismiss settings">✕</button>
         </div>
 
         <div className="settings-tabs">
