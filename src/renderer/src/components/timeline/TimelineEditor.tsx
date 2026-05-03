@@ -8,7 +8,7 @@ const ROW_H = 28
 const ROW_GAP = 2
 const LABEL_W = 104
 const MIN_BLOCK_W = 8
-const ZOOM_LEVELS = [25, 50, 100, 200, 400, 800]
+const ZOOM_LEVELS = [5, 10, 25, 50, 100, 200, 400, 800]
 const DEFAULT_ZOOM = 100
 
 const TICK_CANDIDATES_MS = [50, 100, 250, 500, 1000, 2000, 5000, 10000, 30000, 60000]

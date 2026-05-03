@@ -6,14 +6,23 @@ import { Inspector } from './components/inspector/Inspector'
 import { WaveformPanel } from './components/waveform/WaveformPanel'
 import { TimelineEditor } from './components/timeline/TimelineEditor'
 import { SettingsDialog } from './components/layout/SettingsDialog'
-import { useSelectedCue } from './store'
+import { useSelectedCue, useParentGroup } from './store'
 import type { GroupCue } from './types/cue'
 import './App.css'
 
 export function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const selected = useSelectedCue()
-  const isTimelineGroup = selected?.type === 'group' && (selected as GroupCue).mode === 'timeline'
+  const parentGroup = useParentGroup(selected?.id ?? '')
+
+  // Stay in timeline mode when the group itself OR any of its children is selected
+  const timelineGroupCue = (
+    selected?.type === 'group' && (selected as GroupCue).mode === 'timeline'
+      ? selected as GroupCue
+      : parentGroup?.mode === 'timeline'
+        ? parentGroup
+        : null
+  )
 
   return (
     <div className="app-shell">
@@ -22,8 +31,8 @@ export function App() {
         <CueList />
         <Inspector />
       </div>
-      {isTimelineGroup
-        ? <TimelineEditor cue={selected as GroupCue} />
+      {timelineGroupCue
+        ? <TimelineEditor cue={timelineGroupCue} />
         : <WaveformPanel />
       }
       <TransportBar />
