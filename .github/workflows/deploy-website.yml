@@ -6,8 +6,6 @@ on:
       - main
     paths:
       - "website/**"
-  release:
-    types: [ published ]
   workflow_dispatch:
 
 permissions:
@@ -27,24 +25,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Inject latest release links
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          RELEASE=$(gh release view --repo ${{ github.repository }} --json tagName,assets 2>/dev/null || echo "")
-          if [ -n "$RELEASE" ]; then
-            TAG=$(echo "$RELEASE" | jq -r '.tagName')
-            WIN_URL=$(echo "$RELEASE" | jq -r '.assets[] | select(.name | endswith(".exe")) | .url' | head -1)
-            MAC_URL=$(echo "$RELEASE" | jq -r '.assets[] | select(.name | endswith(".dmg")) | .url' | head -1)
-            sed -i "s|RELEASE_VERSION_PLACEHOLDER|Latest release: $TAG|g" website/index.html
-            [ -n "$WIN_URL" ] && sed -i "s|WIN_URL_PLACEHOLDER|$WIN_URL|g" website/index.html
-            [ -n "$MAC_URL" ] && sed -i "s|MAC_URL_PLACEHOLDER|$MAC_URL|g" website/index.html
-          else
-            sed -i "s|RELEASE_VERSION_PLACEHOLDER|No releases published yet.|g" website/index.html
-            sed -i "s|WIN_URL_PLACEHOLDER|#|g" website/index.html
-            sed -i "s|MAC_URL_PLACEHOLDER|#|g" website/index.html
-          fi
 
       - uses: actions/configure-pages@v5
 
