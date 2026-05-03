@@ -25,7 +25,7 @@
         <a href="#cheat-sheet">Cheat Sheet</a>
         <a href="#changelog">Changelog</a>
       </nav>
-      <a class="donate-btn" href="https://www.paypal.com/donate/?hosted_button_id=REPLACE_ME" target="_blank" rel="noreferrer">Say Thanks on PayPal</a>
+      <a class="donate-btn" href="https://www.paypal.com/donate/?hosted_button_id=CMLJQS38QHP7W" target="_blank" rel="noreferrer">Say Thanks on PayPal</a>
     </div>
   </header>
 
@@ -47,19 +47,19 @@
     <section id="download" class="panel reveal delay-1">
       <h2>Download</h2>
       <p>Get the latest build for your platform from your release channel.</p>
+      <p id="release-version" class="hero-note"></p>
       <div class="cards two-col">
         <article class="card">
           <h3>Windows Installer</h3>
           <p>Standard operator install with desktop/start menu shortcuts.</p>
-          <a class="action action-ghost" href="#" aria-label="Download Windows build">Download .exe</a>
+          <a id="dl-win" class="action action-ghost" href="#" aria-label="Download Windows build">Download .exe</a>
         </article>
         <article class="card">
           <h3>macOS Build</h3>
           <p>Cross-platform package for testing and production show prep.</p>
-          <a class="action action-ghost" href="#" aria-label="Download macOS build">Download .dmg</a>
+          <a id="dl-mac" class="action action-ghost" href="#" aria-label="Download macOS build">Download .dmg</a>
         </article>
       </div>
-      <p class="hero-note">Replace the two links above with your real release URLs.</p>
     </section>
 
     <section id="quickstart" class="panel reveal delay-1">
@@ -149,5 +149,20 @@
   <footer class="site-footer">
     <p>Winslab documentation artifact. Keep this page in sync with runtime behavior as features evolve.</p>
   </footer>
+
+  <script>
+    fetch('https://api.github.com/repos/Huckcity/winslab/releases/latest')
+      .then(r => r.json())
+      .then(release => {
+        const winAsset = release.assets.find(a => a.name.endsWith('.exe'));
+        const macAsset = release.assets.find(a => a.name.endsWith('.dmg'));
+        if (winAsset) document.getElementById('dl-win').href = winAsset.browser_download_url;
+        if (macAsset) document.getElementById('dl-mac').href = macAsset.browser_download_url;
+        document.getElementById('release-version').textContent = 'Latest release: ' + release.tag_name;
+      })
+      .catch(() => {
+        document.getElementById('release-version').textContent = 'No releases published yet.';
+      });
+  </script>
 </body>
 </html>
