@@ -75,6 +75,19 @@ export function TimelineEditor({ cue, expanded, onToggleExpand }: Props) {
   // Local active block — decoupled from global selection so dragging doesn't change selectedId
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null)
 
+  // Cursor + playhead
+  const [cursorMs, setCursorMs] = useState<number | null>(null)
+  const [playheadMs, setPlayheadMs] = useState<number | null>(null)
+  const rafRef = useRef<number | null>(null)
+  const groupRunState = running.get(cue.id)
+  const isPlaying = groupRunState?.state === 'playing'
+
+  const onRulerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isPlaying) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    setCursorMs(Math.max(0, Math.round((e.clientX - rect.left) / pxPerMs)))
+  }
+
   const children = cues.filter(c => c.parentId === cue.id)
 
   // Clear active block if child was removed
@@ -89,11 +102,6 @@ export function TimelineEditor({ cue, expanded, onToggleExpand }: Props) {
     ...children.map(c => c.timelineOffset + Math.max(c.duration, 200))
   )
   const trackW = Math.ceil(contentEndMs * pxPerMs) + 120
-
-  // Playhead
-  const [playheadMs, setPlayheadMs] = useState<number | null>(null)
-  const rafRef = useRef<number | null>(null)
-  const groupRunState = running.get(cue.id)
 
   useEffect(() => {
     if (!groupRunState || groupRunState.state !== 'playing') {
@@ -147,17 +155,20 @@ export function TimelineEditor({ cue, expanded, onToggleExpand }: Props) {
 
   const activeChild = children.find(c => c.id === activeBlockId)
   const totalH = RULER_H + children.length * (ROW_H + ROW_GAP)
+  const displayHeadMs = isPlaying ? playheadMs : cursorMs
 
   return (
     <div className="timeline-panel" data-expanded={expanded}>
       <div className="timeline-header">
         <span className="tl-title">{cue.name || 'Timeline'}</span>
-        {activeChild && (
+        {activeChild ? (
           <span className="tl-selection-info">
             {activeChild.name || activeChild.type}
             {' — '}
             {fmtTime(activeChild.timelineOffset)}
           </span>
+        ) : displayHeadMs !== null && (
+          <span className="tl-selection-info">{fmtTime(displayHeadMs)}</span>
         )}
         <div className="tl-zoom-controls">
           <button className="tl-zoom-btn" onClick={zoomOut} disabled={zoom <= ZOOM_LEVELS[0]}>−</button>
@@ -194,7 +205,11 @@ export function TimelineEditor({ cue, expanded, onToggleExpand }: Props) {
 
           <div className="tl-tracks-outer">
             <div className="tl-tracks-inner" style={{ width: trackW, minHeight: totalH }}>
-              <div className="tl-ruler" style={{ height: RULER_H }}>
+              <div
+                className="tl-ruler"
+                style={{ height: RULER_H, cursor: isPlaying ? 'default' : 'pointer' }}
+                onClick={onRulerClick}
+              >
                 {ticks.map(t => (
                   <div key={t} className="tl-tick" style={{ left: t * pxPerMs }}>
                     <span className="tl-tick-label">{fmtTime(t)}</span>
@@ -230,10 +245,11 @@ export function TimelineEditor({ cue, expanded, onToggleExpand }: Props) {
                 )
               })}
 
-              {playheadMs !== null && (
+              {displayHeadMs !== null && (
                 <div
                   className="tl-playhead"
-                  style={{ left: playheadMs * pxPerMs, height: totalH - RULER_H, top: RULER_H }}
+                  data-live={isPlaying}
+                  style={{ left: displayHeadMs * pxPerMs, height: totalH - RULER_H, top: RULER_H }}
                 />
               )}
             </div>

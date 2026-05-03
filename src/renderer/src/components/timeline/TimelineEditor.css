@@ -233,8 +233,10 @@
   position: absolute;
   width: 2px;
   margin-left: -1px;
-  background: var(--accent-blue);
+  background: var(--accent-amber);
   opacity: 0.9;
   pointer-events: none;
   z-index: 10;
 }
+/* Live playback head turns blue */
+.tl-playhead[data-live='true'] { background: var(--accent-blue); }
