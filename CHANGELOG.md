@@ -1,3 +1,16 @@
+# [0.3.0](https://github.com/Huckcity/winslab/compare/v0.2.0...v0.3.0) (2026-05-03)
+
+
+### Bug Fixes
+
+* require Cmd+Backspace to delete a cue (plain Backspace no longer deletes) ([843a0b2](https://github.com/Huckcity/winslab/commit/843a0b2311e7e261f35aab0246fe89059750c1c2))
+
+
+### Features
+
+* add right-click context menu on cue rows ([acf12be](https://github.com/Huckcity/winslab/commit/acf12be630a35fbc60c989c7deedbe000b8d7e3b))
+* add undo/redo for cue editing (Cmd+Z / Cmd+Shift+Z) ([334ce04](https://github.com/Huckcity/winslab/commit/334ce04b0c8e641f642e995b41716e0f97af1cd6))
+
 # [0.2.0](https://github.com/Huckcity/winslab/compare/v0.1.1...v0.2.0) (2026-05-03)
 
 
