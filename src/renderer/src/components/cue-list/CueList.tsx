@@ -280,7 +280,7 @@ export function CueList() {
       select(renderItems[renderIdx + 1].cue.id)
     } else if (e.key === 'ArrowUp' && renderIdx > 0) {
       select(renderItems[renderIdx - 1].cue.id)
-    } else if (e.key === 'Delete' || e.key === 'Backspace') {
+    } else if (e.key === 'Delete' || (e.key === 'Backspace' && e.metaKey)) {
       if (selectedId) removeCue(selectedId)
     } else if (e.key === 'd' && e.metaKey) {
       if (selectedId) duplicateCue(selectedId)
