@@ -10,6 +10,7 @@ vi.mock('./AudioPlayer', () => ({
     stop: vi.fn(),
     stopAll: vi.fn(),
     setVolume: vi.fn(),
+    setPan: vi.fn(),
     isPlaying: vi.fn(() => false)
   }
 }))
@@ -287,6 +288,19 @@ describe('CueRunner — fade cue', () => {
     const { runner } = setup([fadeCue])
     runner.go()
     expect(audioPlayer.setVolume).toHaveBeenCalledWith('a1', 0, 2000)
+  })
+
+  it('calls audioPlayer.setPan with target value and duration', () => {
+    const fadeCue: FadeCue = {
+      id: 'f1', number: '1', name: 'Fade', type: 'fade',
+      colorLabel: 'none', preWait: 0, postWait: 0, duration: 1000,
+      advance: 'none', isArmed: true, notes: '',
+      targetCueId: 'a1', fadeProperty: 'pan', targetValue: 0.5,
+      curve: 'linear', stopTargetWhenDone: false
+    }
+    const { runner } = setup([fadeCue])
+    runner.go()
+    expect(audioPlayer.setPan).toHaveBeenCalledWith('a1', 0.5, 1000)
   })
 
   it('stops the target cue after fading when stopTargetWhenDone is true', () => {
