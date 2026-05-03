@@ -47,17 +47,17 @@
     <section id="download" class="panel reveal delay-1">
       <h2>Download</h2>
       <p>Get the latest build for your platform from your release channel.</p>
-      <p id="release-version" class="hero-note"></p>
+      <p class="hero-note">RELEASE_VERSION_PLACEHOLDER</p>
       <div class="cards two-col">
         <article class="card">
           <h3>Windows Installer</h3>
           <p>Standard operator install with desktop/start menu shortcuts.</p>
-          <a id="dl-win" class="action action-ghost" href="#" aria-label="Download Windows build">Download .exe</a>
+          <a class="action action-ghost" href="WIN_URL_PLACEHOLDER" aria-label="Download Windows build">Download .exe</a>
         </article>
         <article class="card">
           <h3>macOS Build</h3>
           <p>Cross-platform package for testing and production show prep.</p>
-          <a id="dl-mac" class="action action-ghost" href="#" aria-label="Download macOS build">Download .dmg</a>
+          <a class="action action-ghost" href="MAC_URL_PLACEHOLDER" aria-label="Download macOS build">Download .dmg</a>
         </article>
       </div>
     </section>
@@ -150,19 +150,5 @@
     <p>Winslab documentation artifact. Keep this page in sync with runtime behavior as features evolve.</p>
   </footer>
 
-  <script>
-    fetch('https://api.github.com/repos/Huckcity/winslab/releases/latest')
-      .then(r => r.json())
-      .then(release => {
-        const winAsset = release.assets.find(a => a.name.endsWith('.exe'));
-        const macAsset = release.assets.find(a => a.name.endsWith('.dmg'));
-        if (winAsset) document.getElementById('dl-win').href = winAsset.browser_download_url;
-        if (macAsset) document.getElementById('dl-mac').href = macAsset.browser_download_url;
-        document.getElementById('release-version').textContent = 'Latest release: ' + release.tag_name;
-      })
-      .catch(() => {
-        document.getElementById('release-version').textContent = 'No releases published yet.';
-      });
-  </script>
 </body>
 </html>
