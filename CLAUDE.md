@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Workflow rules
 
-- All development happens on a new branch, never directly on `main`. Create the branch before writing any code: `git checkout -b <descriptive-name>`.
+- All development happens on a new branch, never directly on `main`. Create the branch before writing any code: `git checkout -b <descriptive-name>`. First, make sure to checkout and pull the latest changes from `main`.
 - Every change must be covered by a test. Any change that affects the UI must also have a Playwright E2E test in `e2e/`.
 - Run `npm test && npm run test:e2e` before each commit. Only commit once all tests pass.
 - Make a commit after each coherent batch of work — not one giant commit at the end.
@@ -22,6 +22,7 @@ npm run test:e2e:headed  # Build then run Playwright E2E (visible)
 ```
 
 **Single test file:**
+
 ```bash
 npx vitest src/renderer/src/engine/CueRunner.test.ts   # unit
 npm run build && npx playwright test e2e/playback.spec.ts  # E2E
@@ -47,13 +48,13 @@ Renderer (React/Zustand)
 The renderer has **no direct Node.js access**. Everything goes through `window.winslab`:
 
 ```typescript
-window.winslab.audio.readFile(filePath)    // ArrayBuffer via IPC
-window.winslab.audio.pickFile()            // File dialog
-window.winslab.midi.send({portName, messages})
-window.winslab.osc.send({host, port, address, args})
-window.winslab.workspace.save(workspace, existingPath)
-window.winslab.workspace.open()            // Returns {path, workspace} | null
-window.winslab.workspace.confirmClose(name) // Returns 0=Save 1=DontSave 2=Cancel
+window.winslab.audio.readFile(filePath); // ArrayBuffer via IPC
+window.winslab.audio.pickFile(); // File dialog
+window.winslab.midi.send({ portName, messages });
+window.winslab.osc.send({ host, port, address, args });
+window.winslab.workspace.save(workspace, existingPath);
+window.winslab.workspace.open(); // Returns {path, workspace} | null
+window.winslab.workspace.confirmClose(name); // Returns 0=Save 1=DontSave 2=Cancel
 ```
 
 ### Cue data model (`src/renderer/src/types/cue.ts`)
@@ -61,10 +62,20 @@ window.winslab.workspace.confirmClose(name) // Returns 0=Save 1=DontSave 2=Cance
 All 9 cue types share `CueBase` and form a discriminated union on `type`:
 
 ```typescript
-type CueType = 'audio' | 'midi' | 'osc' | 'wait' | 'fade' | 'stop' | 'group' | 'network' | 'script'
+type CueType =
+  | "audio"
+  | "midi"
+  | "osc"
+  | "wait"
+  | "fade"
+  | "stop"
+  | "group"
+  | "network"
+  | "script";
 ```
 
 Key `CueBase` fields that affect playback behaviour:
+
 - `preWait` / `postWait` — ms delays before/after execution
 - `advance: 'none' | 'on-start' | 'on-end'` — auto-advance to next cue trigger point
 - `isArmed` — disarmed cues are skipped by GO
@@ -75,6 +86,7 @@ Key `CueBase` fields that affect playback behaviour:
 Single flat `cues: Cue[]` array — no nested tree. Group children are interleaved in the array after their parent, identified by `parentId`.
 
 Key store actions:
+
 - `addCue(type, afterId?)` — smart insertion: after a group header → becomes a child; after a child → inherits same parent
 - `moveCue(fromIndex, toIndex, newParentId?)` — drag/drop reordering
 - `duplicateCue(id)` — deep copies group children too
@@ -88,6 +100,7 @@ Hooks: `useSelectedCue()`, `useParentGroup(cueId)`.
 Singleton `cueRunner` exported from the module. Initialized once in `App.tsx` with store callbacks.
 
 Core execution flow for `go()`:
+
 1. `fireCue(cue, onDone)` sequences: pre-wait → `execute(cue)` → post-wait → `onDone()`
 2. `execute()` dispatches by type — audio and wait are async; MIDI/OSC are fire-and-forget
 3. After `onDone`, if `advance === 'on-end'` the next cue is auto-fired; `'on-start'` fires it immediately after pre-wait
@@ -109,6 +122,7 @@ Key methods: `play(cue, onEnd, onDurationKnown)`, `stop(cueId, fadeMs?)`, `stopA
 ### Workspace persistence
 
 Files saved as `.wlab` JSON matching the `Workspace` interface (`src/renderer/src/types/workspace.ts`). `WorkspaceManager` (main process) handles file I/O and migrates legacy fields on load:
+
 - `autoContinue` / `autoFollow` → `advance`
 - `childIds` array → flat `parentId` pointers
 
