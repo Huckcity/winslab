@@ -49,6 +49,14 @@ export function BasicTab({ cue }: Props) {
       </div>
       <div className="field-section-title">Timing</div>
       <div className="field-row">
+        <label>Timeline offset (ms)</label>
+        <input type="number" min={0} value={cue.timelineOffset}
+          onChange={e => {
+            const v = Number(e.target.value)
+            if (!isNaN(v) && v >= 0) set({ timelineOffset: v })
+          }} />
+      </div>
+      <div className="field-row">
         <label>Pre-wait (s)</label>
         <input type="number" min={0} step={0.1} value={cue.preWait / 1000}
           onChange={e => {
