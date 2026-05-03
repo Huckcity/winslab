@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useStore } from '../../store'
 import type { GroupCue, Cue } from '../../types/cue'
+import { cueRunner } from '../../engine/CueRunner'
 import './TimelineEditor.css'
 
 const RULER_H = 22
@@ -83,9 +84,10 @@ export function TimelineEditor({ cue, expanded, onToggleExpand }: Props) {
   const isPlaying = groupRunState?.state === 'playing'
 
   const onRulerClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isPlaying) return
     const rect = e.currentTarget.getBoundingClientRect()
-    setCursorMs(Math.max(0, Math.round((e.clientX - rect.left) / pxPerMs)))
+    const ms = Math.max(0, Math.round((e.clientX - rect.left) / pxPerMs))
+    setCursorMs(ms)
+    cueRunner.seekTimeline(cue.id, ms)
   }
 
   const children = cues.filter(c => c.parentId === cue.id)
@@ -96,6 +98,12 @@ export function TimelineEditor({ cue, expanded, onToggleExpand }: Props) {
       setActiveBlockId(null)
     }
   }, [children, activeBlockId])
+
+  // Sync cursor to stored seek offset when switching between groups
+  useEffect(() => {
+    const offset = cueRunner.getGroupStartOffset(cue.id)
+    setCursorMs(offset > 0 ? offset : null)
+  }, [cue.id])
 
   const contentEndMs = Math.max(
     5000,

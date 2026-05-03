@@ -138,4 +138,65 @@ describe('CueRunner — timeline group mode', () => {
     const firedC1 = setRunning.mock.calls.filter(c => c[0] === 'c1' && c[1]?.state === 'playing')
     expect(firedC1).toHaveLength(0)
   })
+
+  it('seekTimeline while stopped stores offset for next go', () => {
+    const group = makeGroup('g1')
+    // c1 at 0ms, c2 at 500ms — seek to 600ms skips both
+    const c1 = makeWait('c1', 'g1', { timelineOffset: 0, duration: 100 })
+    const c2 = makeWait('c2', 'g1', { timelineOffset: 500, duration: 100 })
+    const { runner, setRunning } = setup([group, c1, c2])
+
+    runner.seekTimeline('g1', 600)
+    runner.go()
+    vi.runAllTimers()
+
+    const fired = setRunning.mock.calls.filter(c => c[1]?.state === 'playing').map(c => c[0])
+    expect(fired).not.toContain('c1')
+    expect(fired).not.toContain('c2')
+  })
+
+  it('seekTimeline while stopped — children past offset still fire', () => {
+    const group = makeGroup('g1')
+    const c1 = makeWait('c1', 'g1', { timelineOffset: 0, duration: 100 })
+    const c2 = makeWait('c2', 'g1', { timelineOffset: 500, duration: 100 })
+    const { runner, setRunning } = setup([group, c1, c2])
+
+    runner.seekTimeline('g1', 300) // skip c1 (at 0), c2 (at 500) fires after 200ms
+    runner.go()
+    vi.advanceTimersByTime(250) // 200ms delay for c2 has elapsed
+
+    const fired = setRunning.mock.calls.filter(c => c[1]?.state === 'playing').map(c => c[0])
+    expect(fired).not.toContain('c1')
+    expect(fired).toContain('c2')
+  })
+
+  it('seekTimeline while playing stops current playback and restarts from offset', () => {
+    const group = makeGroup('g1')
+    const c1 = makeWait('c1', 'g1', { timelineOffset: 0, duration: 2000 })
+    const c2 = makeWait('c2', 'g1', { timelineOffset: 1000, duration: 100 })
+    const { runner, setRunning } = setup([group, c1, c2])
+
+    runner.go()
+    vi.advanceTimersByTime(500) // c1 playing, c2 not yet scheduled
+
+    setRunning.mockClear()
+    runner.seekTimeline('g1', 1500) // seek past c2's offset — c2 should not fire
+    vi.runAllTimers()
+
+    const firedAfterSeek = setRunning.mock.calls.filter(c => c[1]?.state === 'playing').map(c => c[0])
+    expect(firedAfterSeek).not.toContain('c2')
+  })
+
+  it('getGroupStartOffset returns 0 when no seek set', () => {
+    const group = makeGroup('g1')
+    const { runner } = setup([group])
+    expect(runner.getGroupStartOffset('g1')).toBe(0)
+  })
+
+  it('getGroupStartOffset returns the stored value after seekTimeline', () => {
+    const group = makeGroup('g1')
+    const { runner } = setup([group])
+    runner.seekTimeline('g1', 750)
+    expect(runner.getGroupStartOffset('g1')).toBe(750)
+  })
 })

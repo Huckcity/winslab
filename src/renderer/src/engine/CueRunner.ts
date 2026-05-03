@@ -20,6 +20,7 @@ interface RunnerDeps {
 export class CueRunner {
   private deps: RunnerDeps | null = null
   private timers = new Map<string, ReturnType<typeof setTimeout>>()
+  private groupStartOffsets = new Map<string, number>()
 
   init(deps: RunnerDeps): void {
     this.deps = deps
@@ -199,15 +200,23 @@ export class CueRunner {
     if (children.length === 0) { onDone(); return }
 
     if (cue.mode === 'timeline') {
-      let remaining = children.length
-      for (const child of children) {
+      const startOffset = this.groupStartOffsets.get(cue.id) ?? 0
+      this.groupStartOffsets.delete(cue.id)
+
+      // Correct startedAt so the playhead reflects the seek position
+      this.deps!.setRunning(cue.id, { cueId: cue.id, state: 'playing', startedAt: Date.now() - startOffset, progress: 0 })
+
+      const scheduled = children.filter(c => c.timelineOffset >= startOffset)
+      if (scheduled.length === 0) { onDone(); return }
+      let remaining = scheduled.length
+      for (const child of scheduled) {
         const t = setTimeout(() => {
           this.timers.delete(child.id + ':timeline')
           this.fireCue(child, () => {
             remaining--
             if (remaining === 0) onDone()
           })
-        }, child.timelineOffset)
+        }, child.timelineOffset - startOffset)
         this.timers.set(child.id + ':timeline', t)
       }
     } else if (cue.mode === 'random') {
@@ -230,6 +239,29 @@ export class CueRunner {
       audioPlayer.stop(cue.targetCueId, cue.fadeOut ? cue.fadeOutDuration : 0)
     }
     onDone()
+  }
+
+  getGroupStartOffset(groupId: string): number {
+    return this.groupStartOffsets.get(groupId) ?? 0
+  }
+
+  seekTimeline(groupId: string, seekMs: number): void {
+    this.groupStartOffsets.set(groupId, seekMs)
+    const cues = this.deps!.getCues()
+    const group = cues.find(c => c.id === groupId)
+    if (!group || group.type !== 'group' || (group as GroupCue).mode !== 'timeline') return
+
+    const children = cues.filter(c => c.parentId === groupId)
+    const wasPlaying = children.some(c =>
+      this.timers.has(c.id + ':timeline') ||
+      this.timers.has(c.id + ':pre') ||
+      this.timers.has(c.id) ||
+      this.timers.has(c.id + ':post')
+    )
+    if (wasPlaying) {
+      this.stop(groupId)
+      this.executeGroup(group as GroupCue, () => {})
+    }
   }
 
   private hasActiveTimers(cueId: string): boolean {
