@@ -1,0 +1,165 @@
+.inspector {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #1e1e1e;
+  border-left: 1px solid #333;
+}
+
+.inspector-empty {
+  justify-content: center;
+  align-items: center;
+  color: #555;
+  font-size: 13px;
+}
+
+.inspector-tabs {
+  display: flex;
+  border-bottom: 1px solid #333;
+  flex-shrink: 0;
+}
+
+.inspector-tab {
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #666;
+  font-size: 12px;
+  cursor: pointer;
+  transition: color 0.1s;
+}
+
+.inspector-tab:hover { color: #aaa; }
+.inspector-tab[data-active='true'] {
+  color: #ddd;
+  border-bottom-color: #4a9eff;
+}
+
+.inspector-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.inspector-placeholder {
+  color: #555;
+  font-size: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Group inspector */
+.group-children {
+  margin-bottom: 8px;
+}
+
+.group-child-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 6px;
+  background: #252525;
+  border-radius: 3px;
+  margin-bottom: 3px;
+  font-size: 12px;
+}
+
+.group-child-icon { color: #666; width: 14px; flex-shrink: 0; }
+.group-child-num  { color: #888; width: 28px; flex-shrink: 0; font-size: 11px; }
+.group-child-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.group-child-btn {
+  padding: 0 5px;
+  height: 20px;
+  font-size: 11px;
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 2px;
+  color: #aaa;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.group-child-btn:disabled { opacity: 0.3; cursor: default; }
+.group-child-btn:hover:not(:disabled) { background: #444; color: #fff; }
+.group-child-btn.remove { color: #c0392b; border-color: #5a3030; }
+.group-child-btn.remove:hover { background: #3a2020; }
+
+.group-candidates {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.group-candidate {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.05s;
+}
+
+.group-candidate:hover { background: #252525; }
+
+/* Shared form styles used by all inspector tabs */
+.field-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+
+.field-row label {
+  width: 90px;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: #888;
+  text-align: right;
+}
+
+.field-row input,
+.field-row select,
+.field-row textarea {
+  flex: 1;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 3px;
+  color: #ddd;
+  font-size: 12px;
+  padding: 4px 7px;
+  height: 26px;
+  outline: none;
+  transition: border-color 0.1s;
+}
+
+.field-row input:focus,
+.field-row select:focus,
+.field-row textarea:focus {
+  border-color: #4a9eff;
+}
+
+.field-row textarea {
+  height: auto;
+  min-height: 60px;
+  resize: vertical;
+}
+
+.field-row input[type='checkbox'] {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  accent-color: #4a9eff;
+}
+
+.field-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 16px 0 8px;
+}

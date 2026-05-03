@@ -1,0 +1,160 @@
+.toolbar {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 12px;
+  background: #1e1e1e;
+  border-bottom: 1px solid #333;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* File menu */
+.file-menu-wrapper {
+  position: relative;
+}
+
+.toolbar-brand {
+  font-size: 14px;
+  font-weight: 700;
+  color: #e0a020;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 3px;
+  transition: background 0.1s;
+}
+
+.toolbar-brand:hover { background: #2a2a2a; }
+
+.file-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 200px;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 5px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  padding: 4px 0;
+  z-index: 1000;
+}
+
+.file-menu button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 6px 14px;
+  background: transparent;
+  border: none;
+  color: #ccc;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.05s;
+}
+
+.file-menu button:hover { background: #3a3a3a; color: #fff; }
+
+.file-menu kbd {
+  font-size: 10px;
+  color: #777;
+  font-family: inherit;
+}
+
+.file-menu-separator {
+  height: 1px;
+  background: #3a3a3a;
+  margin: 4px 0;
+}
+
+.file-menu-section {
+  padding: 4px 14px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.file-menu-recent {
+  font-size: 12px !important;
+  color: #aaa !important;
+}
+
+.file-menu-recent:hover { color: #fff !important; }
+
+/* Workspace name */
+.workspace-name {
+  display: flex;
+  align-items: center;
+}
+
+.workspace-name-text {
+  font-size: 13px;
+  color: #aaa;
+  cursor: default;
+  padding: 2px 4px;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  transition: border-color 0.1s;
+}
+
+.workspace-name-text:hover { border-color: #444; }
+
+.dirty-dot {
+  color: #e0a020;
+  font-size: 11px;
+}
+
+.workspace-name-input {
+  font-size: 13px;
+  background: #111;
+  border: 1px solid #4a9eff;
+  border-radius: 3px;
+  color: #ddd;
+  padding: 2px 6px;
+  outline: none;
+  width: 180px;
+}
+
+/* Cue type buttons */
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.toolbar-label {
+  font-size: 11px;
+  color: #666;
+  margin-right: 4px;
+}
+
+.toolbar-cue-btn {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 11px;
+  border: 1px solid #444;
+  border-radius: 3px;
+  background: #2a2a2a;
+  color: #bbb;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+
+.toolbar-cue-btn:hover {
+  background: #3a3a3a;
+  color: #fff;
+}

@@ -1,0 +1,96 @@
+.waveform-panel {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: 110px;
+  background: #111;
+  border-top: 1px solid #2a2a2a;
+}
+
+.waveform-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 12px;
+  height: 24px;
+  flex-shrink: 0;
+  border-bottom: 1px solid #1e1e1e;
+}
+
+.waveform-filename {
+  font-size: 11px;
+  color: #888;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 300px;
+}
+
+.waveform-times {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.waveform-elapsed {
+  color: #4a9eff;
+  font-weight: 600;
+}
+
+.waveform-hover {
+  color: #aaa;
+}
+
+.waveform-total {
+  color: #666;
+}
+
+.waveform-start-tag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #e0a020;
+  background: rgba(224, 160, 32, 0.1);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.waveform-start-tag button {
+  background: none;
+  border: none;
+  color: #e0a020;
+  cursor: pointer;
+  font-size: 10px;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.waveform-start-tag button:hover { opacity: 1; }
+
+.waveform-canvas-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.waveform-canvas {
+  position: absolute;
+  inset: 0;
+  cursor: crosshair;
+  display: block;
+}
+
+.waveform-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #555;
+}
