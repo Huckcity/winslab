@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><style>
+  body { margin: 0; background: #181818; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .row { display: flex; gap: 8px; align-items: stretch; }
+  .chip { padding: 8px 14px; border-radius: 3px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; display: flex; flex-direction: column; gap: 2px; }
+  .name { font-size: 9px; opacity: 0.7; font-weight: 400; }
+  .sep { height: 1px; background: #2a2a2a; }
+  .state-row { display: flex; gap: 8px; }
+  .state { padding: 7px 16px; border-radius: 4px; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; color: #fff; text-align: center; }
+</style></head>
+<body>
+<div class="row">
+  <div class="chip" style="background:#e0a020;color:#000"><span>WINSLAB</span><span class="name">accent-amber · brand</span></div>
+  <div class="chip" style="background:rgba(224,160,32,0.1);color:#e0a020;border:1px solid rgba(224,160,32,0.3)"><span>start: 0:02.5 ✕</span><span class="name">amber overlay · start-time tag</span></div>
+</div>
+<div class="row">
+  <div class="chip" style="background:#4a9eff;color:#000"><span>#4a9eff</span><span class="name">accent-blue · interactive</span></div>
+  <div class="chip" style="background:#2a6099;color:#ccc"><span>#2a6099</span><span class="name">blue-dim · waveform unplayed</span></div>
+  <div class="chip" style="background:rgba(74,158,255,0.15);color:#4a9eff;border:1px solid #4a9eff"><span>focused input</span><span class="name">blue focus border</span></div>
+</div>
+<div class="sep"></div>
+<div class="state-row">
+  <div class="state" style="background:#2d7a2d;min-width:80px">▶ GO</div>
+  <div class="state" style="background:#444;min-width:80px">■ STOP</div>
+  <div class="state" style="background:#7a2d2d;min-width:80px">✕ PANIC</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Winslab — UI Kit</title>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body, #root { height: 100%; overflow: hidden; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 13px;
+      background: #181818;
+      color: #ccc;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #1a1a1a; }
+    ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #555; }
+    select option { background: #2a2a2a; color: #ddd; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="Toolbar.jsx"></script>
+<script type="text/babel" src="CueList.jsx"></script>
+<script type="text/babel" src="Inspector.jsx"></script>
+<script type="text/babel" src="TransportBar.jsx"></script>
+<script type="text/babel" src="WaveformPanel.jsx"></script>
+
+<script type="text/babel">
+const { useState, useCallback, useEffect } = React;
+
+// ── Default cue data ─────────────────────────────────────────────────────────
+const SAMPLE_CUES = [
+  {
+    id: 'c1', number: '1', name: 'Intro Music', type: 'audio', colorLabel: 'none',
+    filePath: '/audio/intro-music.wav', duration: 94200, startTime: 0, endTime: null,
+    fadeInDuration: 500, fadeOutDuration: 1000, outputs: [{ volume: 1, pan: 0, deviceId: '', channelPair: [0,1] }],
+    loopCount: 0, preWait: 0, postWait: 0, advance: 'none', isArmed: true, notes: '', colorLabel: 'none',
+  },
+  {
+    id: 'c2', number: '2', name: 'Scene 1 Underscore', type: 'audio', colorLabel: 'blue',
+    filePath: '/audio/scene1-score.wav', duration: 45000, startTime: 2500, endTime: null,
+    fadeInDuration: 1000, fadeOutDuration: 2000, outputs: [{ volume: 0.85, pan: 0, deviceId: '', channelPair: [0,1] }],
+    loopCount: 0, preWait: 2000, postWait: 0, advance: 'none', isArmed: true, notes: 'Check level before show.',
+  },
+  {
+    id: 'c3', number: '3', name: 'Lighting Cue 10', type: 'midi', colorLabel: 'purple',
+    portName: 'IAC Driver Bus 1', messages: [{ kind: 'noteOn', channel: 1, note: 10, velocity: 127 }],
+    duration: 0, preWait: 0, postWait: 0, advance: 'on-start', isArmed: true, notes: '',
+  },
+  {
+    id: 'c4', number: '4', name: 'Wait — Scene Change', type: 'wait', colorLabel: 'orange',
+    duration: 3000, preWait: 0, postWait: 0, advance: 'on-end', isArmed: true, notes: '',
+  },
+  {
+    id: 'c5', number: '5', name: 'Fog Machine', type: 'osc', colorLabel: 'none',
+    host: '192.168.1.50', port: 7000, address: '/fog/on', args: [{ type: 'f', value: 1.0 }],
+    duration: 0, preWait: 0, postWait: 0, advance: 'none', isArmed: true, notes: '',
+  },
+  {
+    id: 'c6', number: '6', name: 'Applause Loop', type: 'audio', colorLabel: 'green',
+    filePath: '/audio/applause.wav', duration: 8000, startTime: 0, endTime: null,
+    fadeInDuration: 200, fadeOutDuration: 500, outputs: [{ volume: 0.9, pan: 0, deviceId: '', channelPair: [0,1] }],
+    loopCount: -1, preWait: 0, postWait: 0, advance: 'none', isArmed: true, notes: 'Loop until GO pressed.',
+  },
+  {
+    id: 'c7', number: '7', name: 'Fade Out All', type: 'fade', colorLabel: 'none',
+    targetCueId: 'c6', fadeProperty: 'volume', targetValue: 0, curve: 'sCurve',
+    stopTargetWhenDone: true, duration: 3000, preWait: 0, postWait: 0, advance: 'none', isArmed: true, notes: '',
+  },
+  {
+    id: 'c8', number: '8', name: 'Act 2 Group', type: 'group', colorLabel: 'yellow',
+    mode: 'playlist', childIds: ['c5', 'c3'],
+    duration: 0, preWait: 0, postWait: 0, advance: 'none', isArmed: true, notes: 'Group for Act 2 cues.',
+  },
+  {
+    id: 'c9', number: '9', name: 'Stop All Audio', type: 'stop', colorLabel: 'red',
+    targetCueId: 'all', fadeOut: true, fadeOutDuration: 1000,
+    duration: 0, preWait: 0, postWait: 0, advance: 'none', isArmed: true, notes: '',
+  },
+];
+
+// ── Store ────────────────────────────────────────────────────────────────────
+function useWinslabStore() {
+  const [cues, setCues] = useState(SAMPLE_CUES);
+  const [selectedId, setSelectedId] = useState('c1');
+  const [running, setRunning] = useState({});
+  const [workspaceName, setWorkspaceName] = useState('My Show');
+  const [isDirty, setIsDirty] = useState(false);
+
+  const select = useCallback((id) => setSelectedId(id), []);
+
+  const addCue = useCallback((type, afterId) => {
+    const typeDefaults = {
+      audio: { filePath: '', duration: 0, startTime: 0, endTime: null, fadeInDuration: 0, fadeOutDuration: 0, outputs: [{ volume: 1, pan: 0, deviceId: '', channelPair: [0,1] }], loopCount: 0 },
+      midi:  { portName: '', messages: [] },
+      osc:   { host: '127.0.0.1', port: 8000, address: '/cue', args: [] },
+      wait:  {},
+      fade:  { targetCueId: '', fadeProperty: 'volume', targetValue: 0, curve: 'linear', stopTargetWhenDone: false },
+      stop:  { targetCueId: 'all', fadeOut: false, fadeOutDuration: 1000 },
+      group: { mode: 'playlist', childIds: [] },
+      network: { method: 'GET', url: '', body: '', headers: {} },
+      script: { language: 'javascript', script: '' },
+    };
+    const id = Math.random().toString(36).slice(2);
+    const newCue = {
+      id, number: String(Math.floor(Math.random() * 900) + 10), name: '',
+      type, colorLabel: 'none', preWait: 0, postWait: 0, duration: 0,
+      advance: 'none', isArmed: true, notes: '',
+      ...(typeDefaults[type] || {}),
+    };
+    setCues(prev => {
+      const arr = [...prev];
+      const idx = afterId ? arr.findIndex(c => c.id === afterId) + 1 : arr.length;
+      arr.splice(idx, 0, newCue);
+      return arr;
+    });
+    setSelectedId(id);
+    setIsDirty(true);
+  }, []);
+
+  const addAudioCue = useCallback((name, afterId) => {
+    const id = Math.random().toString(36).slice(2);
+    const newCue = {
+      id, number: String(Math.floor(Math.random() * 900) + 10), name,
+      type: 'audio', colorLabel: 'none', filePath: name, duration: 30000,
+      startTime: 0, endTime: null, fadeInDuration: 0, fadeOutDuration: 0,
+      outputs: [{ volume: 1, pan: 0, deviceId: '', channelPair: [0,1] }],
+      loopCount: 0, preWait: 0, postWait: 0, advance: 'none', isArmed: true, notes: '',
+    };
+    setCues(prev => {
+      const arr = [...prev];
+      const idx = afterId ? arr.findIndex(c => c.id === afterId) + 1 : arr.length;
+      arr.splice(idx, 0, newCue);
+      return arr;
+    });
+    setSelectedId(id);
+    setIsDirty(true);
+  }, []);
+
+  const removeCue = useCallback((id) => {
+    setCues(prev => prev.filter(c => c.id !== id));
+    setSelectedId(prev => prev === id ? null : prev);
+    setIsDirty(true);
+  }, []);
+
+  const updateCue = useCallback((id, patch) => {
+    setCues(prev => prev.map(c => c.id === id ? { ...c, ...patch } : c));
+    setIsDirty(true);
+  }, []);
+
+  const moveCue = useCallback((fromIndex, toIndex) => {
+    setCues(prev => {
+      const arr = [...prev];
+      const [moved] = arr.splice(fromIndex, 1);
+      arr.splice(toIndex, 0, moved);
+      return arr;
+    });
+    setIsDirty(true);
+  }, []);
+
+  const duplicateCue = useCallback((id) => {
+    setCues(prev => {
+      const src = prev.find(c => c.id === id);
+      if (!src) return prev;
+      const copy = { ...src, id: Math.random().toString(36).slice(2), number: src.number + ' copy' };
+      const idx = prev.findIndex(c => c.id === id);
+      const arr = [...prev];
+      arr.splice(idx + 1, 0, copy);
+      return arr;
+    });
+    setIsDirty(true);
+  }, []);
+
+  const setWorkspaceNameFn = useCallback((name) => {
+    setWorkspaceName(name);
+    setIsDirty(true);
+  }, []);
+
+  // Transport
+  const go = useCallback(() => {
+    const cue = cues.find(c => c.id === selectedId);
+    if (!cue) return;
+    setRunning(prev => ({
+      ...prev,
+      [cue.id]: { cueId: cue.id, state: 'playing', startedAt: Date.now(), progress: 0 },
+    }));
+    // Auto-advance to next cue after a simulated duration
+    const dur = cue.duration || 5000;
+    setTimeout(() => {
+      setRunning(prev => { const n = { ...prev }; delete n[cue.id]; return n; });
+      // Select next cue
+      setCues(curCues => {
+        const idx = curCues.findIndex(c => c.id === cue.id);
+        if (idx < curCues.length - 1) setSelectedId(curCues[idx + 1].id);
+        return curCues;
+      });
+    }, Math.min(dur, 8000));
+  }, [cues, selectedId]);
+
+  const stop = useCallback(() => {
+    setRunning(prev => {
+      const n = { ...prev };
+      if (selectedId) delete n[selectedId];
+      return n;
+    });
+  }, [selectedId]);
+
+  const panic = useCallback(() => {
+    setRunning({});
+  }, []);
+
+  return {
+    cues, selectedId, running, workspaceName, isDirty,
+    select, addCue, addAudioCue, removeCue, updateCue, moveCue, duplicateCue,
+    setWorkspaceName: setWorkspaceNameFn,
+    go, stop, panic,
+  };
+}
+
+// ── App ──────────────────────────────────────────────────────────────────────
+function App() {
+  const store = useWinslabStore();
+
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', height: '100vh',
+      background: '#181818', overflow: 'hidden',
+    }}>
+      <WinslabToolbar store={store} />
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 320px', minHeight: 0, overflow: 'hidden' }}>
+        <WinslabCueList store={store} />
+        <WinslabInspector store={store} />
+      </div>
+      <WinslabWaveformPanel store={store} />
+      <WinslabTransportBar store={store} />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

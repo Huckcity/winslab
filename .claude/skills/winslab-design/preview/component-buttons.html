@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><style>
+  body { margin: 0; background: #181818; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .label { font-size: 9px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.07em; min-width: 60px; }
+  /* Cue type buttons */
+  .cue-btn { height: 26px; padding: 0 10px; font-size: 11px; border: 1px solid #444; border-radius: 3px; background: #2a2a2a; color: #bbb; }
+  .cue-btn.hover { background: #3a3a3a; color: #fff; }
+  /* Transport buttons */
+  .t-btn { height: 36px; padding: 0 20px; border: none; border-radius: 4px; font-size: 14px; font-weight: 700; letter-spacing: 0.05em; }
+  .go  { background: #2d7a2d; color: #fff; }
+  .go.hover { background: #39a039; }
+  .stop { background: #444; color: #ccc; }
+  .panic { background: #7a2d2d; color: #fff; }
+  /* Icon/action buttons */
+  .icon-btn { padding: 0 6px; height: 26px; background: #2a2a2a; border: 1px solid #444; border-radius: 3px; color: #888; font-size: 12px; }
+  .browse-btn { padding: 0 8px; height: 26px; background: #333; border: 1px solid #555; border-radius: 3px; color: #ccc; font-size: 11px; }
+  .add-btn { width: 100%; height: 28px; background: #252525; border: 1px dashed #444; border-radius: 3px; color: #888; font-size: 12px; }
+  .remove-btn { padding: 0 6px; height: 26px; background: #3a2020; border: 1px solid #5a3030; border-radius: 3px; color: #c0392b; font-size: 11px; }
+</style></head>
+<body>
+<div class="row"><span class="label">Cue type</span>
+  <button class="cue-btn">Audio</button>
+  <button class="cue-btn hover">MIDI</button>
+  <button class="cue-btn">Wait</button>
+  <button class="cue-btn">Group</button>
+</div>
+<div class="row"><span class="label">Transport</span>
+  <button class="t-btn stop">■ STOP</button>
+  <button class="t-btn go hover">▶ GO</button>
+  <button class="t-btn panic">✕ PANIC</button>
+</div>
+<div class="row"><span class="label">Actions</span>
+  <button class="icon-btn">↻</button>
+  <button class="browse-btn">Browse</button>
+  <button class="add-btn">+ Add Message</button>
+  <button class="remove-btn">✕</button>
+</div>
+</body>
+</html>

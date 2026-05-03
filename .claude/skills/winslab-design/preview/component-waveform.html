@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><style>
+  body { margin: 0; background: #181818; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  .panel { display: flex; flex-direction: column; height: 110px; background: #111; border-top: 1px solid #2a2a2a; }
+  .header { display: flex; align-items: center; gap: 12px; padding: 4px 12px; height: 24px; border-bottom: 1px solid #1e1e1e; }
+  .filename { font-size: 11px; color: #888; }
+  .times { margin-left: auto; display: flex; gap: 8px; align-items: center; font-size: 11px; font-variant-numeric: tabular-nums; }
+  .elapsed { color: #4a9eff; font-weight: 600; }
+  .total { color: #666; }
+  .start-tag { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #e0a020; background: rgba(224,160,32,0.1); padding: 1px 6px; border-radius: 3px; }
+  .canvas-area { flex: 1; position: relative; background: #111; overflow: hidden; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+</style></head>
+<body>
+<div class="panel">
+  <div class="header">
+    <span class="filename">intro-music.wav</span>
+    <div class="times">
+      <span class="elapsed">0:22.4</span>
+      <span class="total">1:34.2</span>
+    </div>
+    <span class="start-tag">start: 0:02.5 <span style="cursor:pointer;opacity:0.7">✕</span></span>
+  </div>
+  <div class="canvas-area">
+    <canvas id="wv"></canvas>
+  </div>
+</div>
+<script>
+const canvas = document.getElementById('wv');
+const container = canvas.parentElement;
+const rect = container.getBoundingClientRect();
+canvas.width = rect.width * devicePixelRatio;
+canvas.height = rect.height * devicePixelRatio;
+canvas.style.width = rect.width + 'px';
+canvas.style.height = rect.height + 'px';
+const ctx = canvas.getContext('2d');
+const w = canvas.width, h = canvas.height;
+ctx.fillStyle = '#111';
+ctx.fillRect(0, 0, w, h);
+ctx.strokeStyle = '#1e1e1e';
+ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke();
+// Raw-looking waveform — seeded pseudo-random per-pixel min/max like real audio
+const playFrac = 0.237;
+const playedX = Math.floor(playFrac * w);
+
+// Simple seeded PRNG (mulberry32)
+let seed = 0x9e3779b9;
+const rand = () => { seed ^= seed << 13; seed ^= seed >> 17; seed ^= seed << 5; return (seed >>> 0) / 0xffffffff; };
+
+// Generate a low-frequency "envelope" so loudness varies like a real track
+const envPoints = 24;
+const env = Array.from({ length: envPoints + 1 }, () => 0.15 + rand() * 0.85);
+const getEnv = (t) => {
+  const i = t * envPoints;
+  const lo = Math.floor(i), hi = Math.min(lo + 1, envPoints);
+  const f = i - lo;
+  return env[lo] * (1 - f) + env[hi] * f;
+};
+
+const yMid = h / 2;
+for (let x = 0; x < w; x++) {
+  const t = x / w;
+  const envelope = getEnv(t);
+  // Per-column min/max mimicking many samples averaged per pixel
+  const peak = (0.3 + rand() * 0.7) * envelope;
+  const barH = Math.max(1, peak * yMid * 0.92);
+  // Add occasional transient spikes
+  const spike = rand() < 0.04 ? rand() * yMid * 0.25 : 0;
+  const totalH = Math.min(barH + spike, yMid * 0.96);
+  ctx.fillStyle = x <= playedX ? '#4a9eff' : '#2a6099';
+  ctx.fillRect(x, yMid - totalH, 1, totalH * 2);
+}
+// Playhead
+ctx.strokeStyle = '#fff';
+ctx.lineWidth = 1.5;
+ctx.beginPath(); ctx.moveTo(playedX, 0); ctx.lineTo(playedX, h); ctx.stroke();
+ctx.fillStyle = '#fff';
+ctx.beginPath(); ctx.moveTo(playedX - 5, 0); ctx.lineTo(playedX + 5, 0); ctx.lineTo(playedX, 8); ctx.fill();
+// Start marker
+const startX = Math.floor(0.026 * w);
+ctx.strokeStyle = '#e0a020';
+ctx.setLineDash([4,4]);
+ctx.beginPath(); ctx.moveTo(startX, 0); ctx.lineTo(startX, h); ctx.stroke();
+</script>
+</body>
+</html>

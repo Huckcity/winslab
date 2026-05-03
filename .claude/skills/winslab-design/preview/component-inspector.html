@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><style>
+  body { margin: 0; background: #1e1e1e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; color: #ccc; width: 320px; }
+  .tabs { display: flex; border-bottom: 1px solid #333; }
+  .tab { padding: 8px 14px; background: transparent; border: none; border-bottom: 2px solid transparent; color: #666; font-size: 12px; cursor: default; }
+  .tab.active { color: #ddd; border-bottom-color: #4a9eff; }
+  .tab:hover { color: #aaa; }
+  .body { padding: 12px; }
+  .section-title { font-size: 10px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 0.08em; margin: 12px 0 8px; }
+  .field { display: flex; align-items: center; margin-bottom: 10px; gap: 8px; }
+  .field label { width: 90px; flex-shrink: 0; font-size: 11px; color: #888; text-align: right; }
+  .field input, .field select {
+    flex: 1; background: #2a2a2a; border: 1px solid #444; border-radius: 3px;
+    color: #ddd; font-size: 12px; padding: 4px 7px; height: 26px; outline: none;
+  }
+  .field input.focus { border-color: #4a9eff; }
+  .colors { display: flex; gap: 4px; }
+  .cdot { width: 18px; height: 18px; border-radius: 3px; cursor: default; border: 2px solid transparent; }
+  .cdot.sel { border-color: #fff; }
+</style></head>
+<body>
+<div class="tabs">
+  <button class="tab active">Basics</button>
+  <button class="tab">Audio</button>
+  <button class="tab">Timing</button>
+</div>
+<div class="body">
+  <div class="field"><label>Number</label><input value="1" /></div>
+  <div class="field"><label>Name</label><input value="Intro Music" class="focus" /></div>
+  <div class="field">
+    <label>Color</label>
+    <div class="colors">
+      <div class="cdot" style="background:#444"></div>
+      <div class="cdot" style="background:#c0392b"></div>
+      <div class="cdot" style="background:#e67e22"></div>
+      <div class="cdot" style="background:#f1c40f"></div>
+      <div class="cdot sel" style="background:#27ae60"></div>
+      <div class="cdot" style="background:#2980b9"></div>
+      <div class="cdot" style="background:#8e44ad"></div>
+      <div class="cdot" style="background:#e91e8c"></div>
+    </div>
+  </div>
+  <div class="section-title">Timing</div>
+  <div class="field"><label>Pre-wait (s)</label><input value="0" /></div>
+  <div class="field"><label>Post-wait (s)</label><input value="0" /></div>
+  <div class="field">
+    <label>Advance</label>
+    <select><option>None</option><option>On start</option><option selected>On end</option></select>
+  </div>
+</div>
+</body>
+</html>

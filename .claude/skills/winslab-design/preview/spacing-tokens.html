@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><style>
+  body { margin: 0; background: #181818; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 14px 18px; display: flex; gap: 24px; }
+  .col { display: flex; flex-direction: column; gap: 6px; }
+  .title { font-size: 9px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .item { display: flex; align-items: center; gap: 8px; }
+  .bar { background: #2a6099; height: 8px; border-radius: 1px; flex-shrink: 0; }
+  .label { font-size: 10px; color: #555; font-family: monospace; white-space: nowrap; }
+  .h-item { display: flex; align-items: center; gap: 8px; }
+  .h-bar { background: #2a6099; width: 8px; border-radius: 1px; }
+</style></head>
+<body>
+<div class="col">
+  <div class="title">Space</div>
+  <div class="item"><div class="bar" style="width:4px"></div><span class="label">4px — space-1</span></div>
+  <div class="item"><div class="bar" style="width:8px"></div><span class="label">8px — space-2</span></div>
+  <div class="item"><div class="bar" style="width:12px"></div><span class="label">12px — space-3</span></div>
+  <div class="item"><div class="bar" style="width:16px"></div><span class="label">16px — space-4</span></div>
+  <div class="item"><div class="bar" style="width:24px"></div><span class="label">24px — space-6</span></div>
+</div>
+<div class="col">
+  <div class="title">Heights</div>
+  <div class="h-item"><div class="h-bar" style="height:26px"></div><span class="label">26px — col header</span></div>
+  <div class="h-item"><div class="h-bar" style="height:32px"></div><span class="label">32px — cue row</span></div>
+  <div class="h-item"><div class="h-bar" style="height:36px"></div><span class="label">36px — btn-lg (transport)</span></div>
+  <div class="h-item"><div class="h-bar" style="height:44px"></div><span class="label">44px — toolbar</span></div>
+  <div class="h-item"><div class="h-bar" style="height:52px"></div><span class="label">52px — transport bar</span></div>
+</div>
+<div class="col">
+  <div class="title">Radius</div>
+  <div class="item"><div style="width:24px;height:14px;border-radius:2px;background:#2a6099"></div><span class="label">2px — color bar</span></div>
+  <div class="item"><div style="width:24px;height:14px;border-radius:3px;background:#2a6099"></div><span class="label">3px — inputs/btns</span></div>
+  <div class="item"><div style="width:24px;height:14px;border-radius:4px;background:#2a6099"></div><span class="label">4px — transport</span></div>
+  <div class="item"><div style="width:24px;height:14px;border-radius:5px;background:#2a6099"></div><span class="label">5px — dropdown</span></div>
+  <div class="item"><div style="width:36px;height:14px;border-radius:10px;background:#2a6099"></div><span class="label">10px — pill</span></div>
+</div>
+</body>
+</html>

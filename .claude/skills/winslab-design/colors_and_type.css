@@ -1,0 +1,203 @@
+/**
+ * Winslab Design System
+ * Colors & Typography CSS Custom Properties
+ *
+ * Source: Huckcity/winslab (Electron + React app)
+ * Surface: Desktop app (dark theme only)
+ */
+
+:root {
+
+  /* ─── BACKGROUND RAMP ─────────────────────────────────────────────────── */
+  --bg-well:       #111111;   /* Waveform panel, deepest surface */
+  --bg-base:       #181818;   /* App root, body */
+  --bg-raised:     #1a1a1a;   /* Cue list header, transport bar */
+  --bg-surface:    #1e1e1e;   /* Toolbar, inspector panel */
+  --bg-card:       #252525;   /* MIDI message blocks, group child rows */
+  --bg-input:      #2a2a2a;   /* Form inputs, cue-type buttons */
+  --bg-hover:      #3a3a3a;   /* Button / menu item hover */
+  --bg-selected:   #0d1f33;   /* Name-edit input background (focused) */
+
+  /* ─── BORDER ──────────────────────────────────────────────────────────── */
+  --border:        #333333;   /* Primary panel dividers */
+  --border-soft:   #2a2a2a;   /* Subtle internal dividers */
+  --border-input:  #444444;   /* Input / button borders */
+  --border-focus:  #4a9eff;   /* Focused input / active tab underline */
+
+  /* ─── STATE BACKGROUNDS ───────────────────────────────────────────────── */
+  --bg-selected-row:  #1e2d3d;   /* Selected cue row */
+  --bg-playing-row:   #1a2a1a;   /* Playing cue row */
+  --bg-prewait-row:   #2a2a1a;   /* Pre-wait cue row */
+
+  /* ─── FOREGROUND / TEXT ───────────────────────────────────────────────── */
+  --fg-primary:   #dddddd;   /* Headings, strong text, selected row text */
+  --fg-body:      #cccccc;   /* Base body text */
+  --fg-secondary: #bbbbbb;   /* Cue row text */
+  --fg-tertiary:  #aaaaaa;   /* Secondary labels, workspace name */
+  --fg-muted:     #888888;   /* Form labels, cue numbers */
+  --fg-dim:       #666666;   /* Column headers, duration values */
+  --fg-ghost:     #555555;   /* Empty states, inspector placeholder */
+
+  /* ─── ACCENT — AMBER (brand) ──────────────────────────────────────────── */
+  --accent-amber:         #e0a020;   /* WinsLab wordmark, dirty dot, start-time marker */
+  --accent-amber-bg:      rgba(224, 160, 32, 0.10);   /* Start-time tag background */
+
+  /* ─── ACCENT — BLUE (interactive) ────────────────────────────────────── */
+  --accent-blue:          #4a9eff;   /* Focus border, active tab, drop indicator, playhead */
+  --accent-blue-dim:      #2a6099;   /* Waveform fill (unplayed portion) */
+  --accent-blue-glow:     rgba(74, 158, 255, 0.15);  /* Progress bar track */
+  --accent-blue-overlay:  rgba(74, 158, 255, 0.60);  /* Drop indicator glow */
+
+  /* ─── TRANSPORT / STATE COLORS ────────────────────────────────────────── */
+  --state-go:              #2d7a2d;
+  --state-go-hover:        #39a039;
+  --state-go-active:       #1e5a1e;
+  --state-stop:            #444444;
+  --state-stop-hover:      #555555;
+  --state-stop-active:     #333333;
+  --state-panic:           #7a2d2d;
+  --state-panic-hover:     #a03939;
+  --state-panic-active:    #5a1e1e;
+  --state-running-bg:      #1e4a1e;
+  --state-running-fg:      #5aaa5a;
+
+  /* ─── CUE COLOR LABELS ────────────────────────────────────────────────── */
+  --cue-color-none:    transparent;
+  --cue-color-red:     #c0392b;
+  --cue-color-orange:  #e67e22;
+  --cue-color-yellow:  #f1c40f;
+  --cue-color-green:   #27ae60;
+  --cue-color-blue:    #2980b9;
+  --cue-color-purple:  #8e44ad;
+  --cue-color-pink:    #e91e8c;
+
+  /* ─── TYPOGRAPHY ──────────────────────────────────────────────────────── */
+
+  /* Font stacks */
+  --font-ui:    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:  'Segoe UI Mono', 'SF Mono', 'Consolas', monospace;
+
+  /* Base */
+  --font-size-base:   13px;
+  --line-height-base: 1.4;
+  --font-smoothing:   antialiased;
+
+  /* Scale */
+  --text-xs:    10px;   /* Section titles, column headers, kbd shortcuts, badges */
+  --text-sm:    11px;   /* Labels, timecodes, status pills, secondary values */
+  --text-base:  12px;   /* Cue row text, inspector field text */
+  --text-md:    13px;   /* Body, workspace name, menu items */
+  --text-lg:    14px;   /* Brand wordmark, transport buttons */
+
+  /* Weights */
+  --fw-normal:  400;
+  --fw-medium:  600;
+  --fw-bold:    700;
+
+  /* Letter spacing */
+  --ls-caps:   0.06em;    /* Column headers, section titles */
+  --ls-wide:   0.08em;    /* Field section titles */
+  --ls-brand:  0.05em;    /* Brand wordmark, transport buttons */
+
+  /* ─── SEMANTIC TYPE TOKENS ────────────────────────────────────────────── */
+
+  /* Headings (section separators in inspector) */
+  --type-section-title-size:    var(--text-xs);
+  --type-section-title-weight:  var(--fw-bold);
+  --type-section-title-color:   var(--fg-ghost);
+  --type-section-title-ls:      var(--ls-wide);
+  --type-section-title-transform: uppercase;
+
+  /* Column headers (cue list) */
+  --type-col-header-size:    var(--text-xs);
+  --type-col-header-weight:  var(--fw-medium);
+  --type-col-header-color:   var(--fg-dim);
+  --type-col-header-ls:      var(--ls-caps);
+  --type-col-header-transform: uppercase;
+
+  /* Body row text */
+  --type-row-size:    var(--text-base);
+  --type-row-weight:  var(--fw-normal);
+  --type-row-color:   var(--fg-secondary);
+
+  /* Brand / wordmark */
+  --type-brand-size:    var(--text-lg);
+  --type-brand-weight:  var(--fw-bold);
+  --type-brand-color:   var(--accent-amber);
+  --type-brand-ls:      var(--ls-brand);
+  --type-brand-transform: uppercase;
+
+  /* Transport button labels */
+  --type-transport-size:   var(--text-lg);
+  --type-transport-weight: var(--fw-bold);
+  --type-transport-color:  #ffffff;
+  --type-transport-ls:     var(--ls-brand);
+  --type-transport-transform: uppercase;
+
+  /* Form labels */
+  --type-label-size:   var(--text-sm);
+  --type-label-color:  var(--fg-muted);
+  --type-label-weight: var(--fw-normal);
+
+  /* Timecode / tabular numbers */
+  --type-timecode-size:   var(--text-sm);
+  --type-timecode-color:  var(--accent-blue);
+  --type-timecode-family: var(--font-mono);
+  --type-timecode-variant: tabular-nums;
+
+  /* State pill */
+  --type-pill-size:   var(--text-xs);
+  --type-pill-color:  #7aaa5a;
+  --type-pill-bg:     #2a3a1a;
+
+  /* ─── SPACING & GEOMETRY ──────────────────────────────────────────────── */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+
+  /* Component heights */
+  --h-toolbar:     44px;
+  --h-cue-row:     32px;
+  --h-col-header:  26px;
+  --h-transport:   52px;
+  --h-waveform:   110px;
+  --h-waveform-header: 24px;
+  --h-button-sm:   26px;
+  --h-button-md:   28px;
+  --h-button-lg:   36px;
+  --h-input:       26px;
+
+  /* Layout */
+  --inspector-width: 320px;
+
+  /* ─── BORDER RADIUS ───────────────────────────────────────────────────── */
+  --radius-sm:    2px;   /* Color label bar */
+  --radius-md:    3px;   /* Inputs, small buttons, cue-type buttons */
+  --radius-lg:    4px;   /* Transport buttons, cue blocks */
+  --radius-xl:    5px;   /* File-menu dropdown */
+  --radius-pill:  10px;  /* Running badge, state pills */
+
+  /* ─── SHADOW ──────────────────────────────────────────────────────────── */
+  --shadow-menu:   0 8px 24px rgba(0, 0, 0, 0.5);   /* Dropdown menus only */
+
+  /* ─── TRANSITIONS ─────────────────────────────────────────────────────── */
+  --transition-fast:  background 0.05s ease, color 0.05s ease;
+  --transition-std:   background 0.10s ease, color 0.10s ease, border-color 0.10s ease;
+
+  /* ─── SCROLLBAR ───────────────────────────────────────────────────────── */
+  --scrollbar-width:  6px;
+  --scrollbar-track:  #1a1a1a;
+  --scrollbar-thumb:  #444444;
+  --scrollbar-thumb-hover: #555555;
+}
+
+/* ── Scrollbar utility ──────────────────────────────────────────────────── */
+* { box-sizing: border-box; }
+
+::-webkit-scrollbar { width: var(--scrollbar-width); }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: var(--radius-md); }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }

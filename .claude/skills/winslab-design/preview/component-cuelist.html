@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><style>
+  body { margin: 0; background: #181818; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; }
+  .header {
+    display: flex; align-items: center; height: 26px; padding: 0 8px;
+    background: #1a1a1a; border-bottom: 1px solid #333;
+    font-size: 10px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .row {
+    display: flex; align-items: center; height: 32px; padding: 0 8px;
+    border-bottom: 1px solid #222; color: #bbb; position: relative;
+  }
+  .row.selected { background: #1e2d3d; color: #ddd; }
+  .row.playing  { background: #1a2a1a; }
+  .row.prewait  { background: #2a2a1a; }
+
+  /* Columns */
+  .c-num  { width: 48px; flex-shrink: 0; display: flex; align-items: center; gap: 4px; color: #888; font-size: 11px; }
+  .c-icon { font-size: 14px; color: #777; line-height: 1; width: 18px; text-align: center; }
+  .c-color { width: 6px; height: 20px; border-radius: 2px; flex-shrink: 0; margin: 0 10px; }
+  .c-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .c-dur  { width: 72px; flex-shrink: 0; text-align: right; color: #666; font-variant-numeric: tabular-nums; }
+  .c-pre  { width: 60px; flex-shrink: 0; text-align: right; color: #666; font-variant-numeric: tabular-nums; }
+  .c-post { width: 60px; flex-shrink: 0; text-align: right; color: #666; font-variant-numeric: tabular-nums; }
+  .c-adv  { width: 60px; flex-shrink: 0; text-align: center; color: #4a8a4a; font-size: 10px; }
+
+  /* State pills */
+  .pill { font-size: 10px; padding: 1px 5px; border-radius: 8px; flex-shrink: 0; }
+  .pill.playing { background: #2a3a1a; color: #7aaa5a; }
+  .pill.prewait { background: #3a3a1a; color: #aaa890; }
+
+  /* Progress bar */
+  .progress { position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: rgba(74,158,255,0.15); }
+  .progress-fill { height: 100%; background: #4a9eff; width: 45%; }
+</style></head>
+<body>
+
+<div class="header">
+  <span style="width:48px">#</span>
+  <span style="width:6px;margin:0 10px"></span>
+  <span style="flex:1">Name</span>
+  <span style="width:72px;text-align:right">Duration</span>
+  <span style="width:60px;text-align:right">Pre-W</span>
+  <span style="width:60px;text-align:right">Post-W</span>
+  <span style="width:60px;text-align:center">Advance</span>
+</div>
+
+<!-- Audio / default -->
+<div class="row">
+  <div class="c-num"><span class="c-icon">♪</span>1</div>
+  <div class="c-color" style="background:transparent;border:1px dashed #333"></div>
+  <div class="c-name">Intro Music</div>
+  <div class="c-dur">1:34.2</div><div class="c-pre">–</div><div class="c-post">–</div><div class="c-adv"></div>
+</div>
+
+<!-- Audio / selected -->
+<div class="row selected">
+  <div class="c-num"><span class="c-icon">♪</span>2</div>
+  <div class="c-color" style="background:#2980b9"></div>
+  <div class="c-name">Scene 1 Underscore</div>
+  <div class="c-dur">0:45.0</div><div class="c-pre">0:02.0</div><div class="c-post">–</div><div class="c-adv"></div>
+</div>
+
+<!-- Audio / playing -->
+<div class="row playing">
+  <div class="c-num"><span class="c-icon">♪</span>3</div>
+  <div class="c-color" style="background:#27ae60"></div>
+  <div class="c-name">Applause Loop <span class="pill playing">playing</span></div>
+  <div class="c-dur">0:08.0</div><div class="c-pre">–</div><div class="c-post">–</div><div class="c-adv">on-end</div>
+  <div class="progress"><div class="progress-fill"></div></div>
+</div>
+
+<!-- Wait / pre-wait -->
+<div class="row prewait">
+  <div class="c-num"><span class="c-icon">⏱</span>4</div>
+  <div class="c-color" style="background:#e67e22"></div>
+  <div class="c-name">Wait 3s <span class="pill prewait">pre-wait</span></div>
+  <div class="c-dur">0:03.0</div><div class="c-pre">0:02.0</div><div class="c-post">–</div><div class="c-adv"></div>
+</div>
+
+<!-- MIDI -->
+<div class="row">
+  <div class="c-num"><span class="c-icon" style="font-size:13px;font-weight:700;color:#777">M</span>5</div>
+  <div class="c-color" style="background:#8e44ad"></div>
+  <div class="c-name">Lighting Cue 10</div>
+  <div class="c-dur">–</div><div class="c-pre">–</div><div class="c-post">–</div><div class="c-adv"></div>
+</div>
+
+<!-- OSC -->
+<div class="row">
+  <div class="c-num"><span class="c-icon" style="font-size:13px;font-weight:700;color:#777">O</span>6</div>
+  <div class="c-color" style="background:transparent;border:1px dashed #333"></div>
+  <div class="c-name">Fog Machine On</div>
+  <div class="c-dur">–</div><div class="c-pre">–</div><div class="c-post">0:01.0</div><div class="c-adv">on-start</div>
+</div>
+
+<!-- Fade -->
+<div class="row">
+  <div class="c-num"><span class="c-icon">↘</span>7</div>
+  <div class="c-color" style="background:transparent;border:1px dashed #333"></div>
+  <div class="c-name">Fade Out All</div>
+  <div class="c-dur">0:03.0</div><div class="c-pre">–</div><div class="c-post">–</div><div class="c-adv"></div>
+</div>
+
+</body>
+</html>

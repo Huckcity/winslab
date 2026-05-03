@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><style>
+  body { margin: 0; background: #0a0a0a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  .row { display: flex; gap: 2px; height: 100px; padding: 0 2px; }
+  .swatch { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; padding: 7px 9px; border-radius: 3px; }
+  .label { font-size: 10px; color: rgba(255,255,255,0.7); letter-spacing: 0.03em; line-height: 1.5; font-weight: 600; }
+  .value { font-size: 10px; color: rgba(255,255,255,0.45); font-family: monospace; }
+  .tokens { display: flex; gap: 12px; padding: 12px 14px; flex-wrap: wrap; align-items: center; }
+  .token { display: flex; align-items: center; gap: 7px; }
+  .dot { width: 12px; height: 12px; border-radius: 2px; border: 1px solid rgba(255,255,255,0.12); }
+  .tname { font-size: 11px; color: #777; }
+</style></head>
+<body>
+<div class="row">
+  <div class="swatch" style="background:#111111"><div class="label">bg-well</div><div class="value">#111</div></div>
+  <div class="swatch" style="background:#181818"><div class="label">bg-base</div><div class="value">#181818</div></div>
+  <div class="swatch" style="background:#1a1a1a"><div class="label">bg-raised</div><div class="value">#1a1a1a</div></div>
+  <div class="swatch" style="background:#1e1e1e"><div class="label">bg-surface</div><div class="value">#1e1e1e</div></div>
+  <div class="swatch" style="background:#252525"><div class="label">bg-card</div><div class="value">#252525</div></div>
+  <div class="swatch" style="background:#2a2a2a"><div class="label">bg-input</div><div class="value">#2a2a2a</div></div>
+  <div class="swatch" style="background:#3a3a3a"><div class="label">bg-hover</div><div class="value">#3a3a3a</div></div>
+</div>
+<div class="tokens">
+  <div class="token"><div class="dot" style="background:#333"></div><span class="tname">border #333</span></div>
+  <div class="token"><div class="dot" style="background:#444"></div><span class="tname">border-input #444</span></div>
+  <div class="token"><div class="dot" style="background:#2a2a2a"></div><span class="tname">border-soft #2a2a2a</span></div>
+</div>
+</body>
+</html>

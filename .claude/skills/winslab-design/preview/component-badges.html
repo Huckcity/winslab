@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><style>
+  body { margin: 0; background: #181818; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .badge { font-size: 11px; padding: 3px 8px; border-radius: 10px; }
+  .badge.idle { background: #2a2a2a; color: #666; }
+  .badge.running { background: #1e4a1e; color: #5aaa5a; }
+  .pill { font-size: 10px; padding: 3px 8px; border-radius: 8px; }
+  .pill.playing { background: #2a3a1a; color: #7aaa5a; }
+  .pill.prewait { background: #3a3a1a; color: #aaa; }
+  .drop-indicator { width: 100%; height: 2px; background: #4a9eff; box-shadow: 0 0 6px rgba(74,158,255,0.6); border-radius: 1px; }
+  .label { font-size: 9px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.07em; }
+</style></head>
+<body>
+  <div class="row">
+    <span class="label">Running badge</span>
+    <span class="badge idle">idle</span>
+    <span class="badge running">2 running</span>
+  </div>
+  <div class="row">
+    <span class="label">State pills</span>
+    <span class="pill playing">playing</span>
+    <span class="pill prewait">pre-wait</span>
+  </div>
+  <div>
+    <div class="label" style="margin-bottom:6px">Drop indicator</div>
+    <div class="drop-indicator"></div>
+  </div>
+</body>
+</html>
