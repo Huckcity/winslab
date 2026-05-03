@@ -146,6 +146,22 @@ class AudioPlayer {
     }
   }
 
+  setPan(cueId: string, pan: number, durationMs = 0): void {
+    const node = this.active.get(cueId)
+    if (!node) return
+    const ctx = this.getCtx()
+    if (durationMs > 0) {
+      node.panner.pan.linearRampToValueAtTime(pan, ctx.currentTime + durationMs / 1000)
+    } else {
+      node.panner.pan.setValueAtTime(pan, ctx.currentTime)
+    }
+  }
+
+  async setOutputDevice(deviceId: string): Promise<void> {
+    const ctx = this.getCtx()
+    await (ctx as any).setSinkId(deviceId)
+  }
+
   isPlaying(cueId: string): boolean {
     return this.active.has(cueId)
   }

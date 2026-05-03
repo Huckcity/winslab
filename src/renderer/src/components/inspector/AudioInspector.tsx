@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useStore } from '../../store'
 import type { AudioCue } from '../../types/cue'
+import { audioPlayer } from '../../engine/AudioPlayer'
 
 interface Props { cue: AudioCue; tab: string }
 
@@ -14,6 +15,8 @@ export function AudioInspector({ cue, tab }: Props) {
     const outputs = [...cue.outputs]
     outputs[0] = { ...output, ...patch }
     set({ outputs })
+    if ('volume' in patch) audioPlayer.setVolume(cue.id, patch.volume!)
+    if ('pan' in patch) audioPlayer.setPan(cue.id, patch.pan!)
   }
 
   const [loading, setLoading] = useState(false)

@@ -19,7 +19,11 @@ const MORE_CUES: { type: CueType; icon: string; label: string }[] = [
   { type: 'script',  icon: '{ }', label: 'Script'  },
 ]
 
-export function Toolbar() {
+interface Props {
+  onOpenSettings: () => void
+}
+
+export function Toolbar({ onOpenSettings }: Props) {
   const addCue = useStore(s => s.addCue)
   const selectedId = useStore(s => s.selectedId)
 
@@ -69,10 +73,11 @@ export function Toolbar() {
       else if (e.key === 's') { e.preventDefault(); save() }
       else if (e.key === 'o') { e.preventDefault(); openWorkspace() }
       else if (e.key === 'n') { e.preventDefault(); newWorkspace() }
+      else if (e.key === ',') { e.preventDefault(); onOpenSettings() }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [save, saveAs, openWorkspace, newWorkspace])
+  }, [save, saveAs, openWorkspace, newWorkspace, onOpenSettings])
 
   const handleMenuAction = async (action: () => void | Promise<void>) => {
     setFileMenuOpen(false)
@@ -120,9 +125,10 @@ export function Toolbar() {
                       key={p}
                       className="file-menu-recent"
                       onClick={() => handleMenuAction(() =>
-                        window.winslab.workspace.openPath(p).then(r =>
-                          useStore.getState().loadWorkspace(r.workspace.cues, r.workspace.name, r.path)
-                        )
+                        window.winslab.workspace.openPath(p).then(r => {
+                          const { cues, name, audioSettings, midiSettings } = r.workspace
+                          useStore.getState().loadWorkspace(cues, name, r.path, audioSettings, midiSettings)
+                        })
                       )}
                       title={p}
                     >
@@ -131,6 +137,10 @@ export function Toolbar() {
                   ))}
                 </>
               )}
+              <div className="file-menu-separator" />
+              <button onClick={() => handleMenuAction(onOpenSettings)}>
+                <span>Settings…</span><kbd>⌘,</kbd>
+              </button>
             </div>
           )}
         </div>

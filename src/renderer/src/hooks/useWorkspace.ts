@@ -2,20 +2,25 @@ import { useCallback, useEffect } from 'react'
 import { useStore } from '../store'
 import type { Workspace } from '../types/workspace'
 
-function buildWorkspace(name: string, cues: Workspace['cues']): Workspace {
+function buildWorkspace(
+  name: string,
+  cues: Workspace['cues'],
+  audioSettings: Workspace['audioSettings'],
+  midiSettings: Workspace['midiSettings'],
+): Workspace {
   return {
     version: 1,
     id: crypto.randomUUID(),
     name,
     createdAt: new Date().toISOString(),
-    audioSettings: { outputDeviceId: 'default', sampleRate: 48000, bufferSize: 256 },
-    midiSettings: { outputPortName: '', inputPortName: '' },
+    audioSettings,
+    midiSettings,
     cues
   }
 }
 
 export function useWorkspace() {
-  const { workspaceName, workspacePath, isDirty, cues, loadWorkspace, saveSucceeded, setWorkspaceName } = useStore()
+  const { workspaceName, workspacePath, isDirty, cues, audioSettings, midiSettings, loadWorkspace, saveSucceeded, setWorkspaceName } = useStore()
 
   // Keep window title in sync
   useEffect(() => {
@@ -29,13 +34,13 @@ export function useWorkspace() {
     const response = await window.winslab.workspace.confirmClose(workspaceName)
     if (response === 2) return false   // Cancel
     if (response === 0) {              // Save
-      const ws = buildWorkspace(workspaceName, cues)
+      const ws = buildWorkspace(workspaceName, cues, audioSettings, midiSettings)
       const savedPath = await window.winslab.workspace.save(ws, workspacePath)
       if (!savedPath) return false     // User cancelled save dialog
       saveSucceeded(savedPath, workspaceName)
     }
     return true
-  }, [isDirty, workspaceName, workspacePath, cues, saveSucceeded])
+  }, [isDirty, workspaceName, workspacePath, cues, audioSettings, midiSettings, saveSucceeded])
 
   // When the main process intercepts the OS close button, run the dirty check.
   useEffect(() => {
@@ -56,7 +61,7 @@ export function useWorkspace() {
     const result = await window.winslab.workspace.open()
     if (!result) return
     const name = result.workspace.name || 'Untitled'
-    loadWorkspace(result.workspace.cues, name, result.path)
+    loadWorkspace(result.workspace.cues, name, result.path, result.workspace.audioSettings, result.workspace.midiSettings)
   }, [guardDirty, loadWorkspace])
 
   const openRecent = useCallback(async (filePath: string) => {
@@ -64,27 +69,27 @@ export function useWorkspace() {
     try {
       const result = await window.winslab.workspace.openPath(filePath)
       const name = result.workspace.name || 'Untitled'
-      loadWorkspace(result.workspace.cues, name, result.path)
+      loadWorkspace(result.workspace.cues, name, result.path, result.workspace.audioSettings, result.workspace.midiSettings)
     } catch {
       alert(`Could not open file: ${filePath}`)
     }
   }, [guardDirty, loadWorkspace])
 
   const save = useCallback(async (): Promise<boolean> => {
-    const ws = buildWorkspace(workspaceName, cues)
+    const ws = buildWorkspace(workspaceName, cues, audioSettings, midiSettings)
     const savedPath = await window.winslab.workspace.save(ws, workspacePath)
     if (!savedPath) return false
     saveSucceeded(savedPath, workspaceName)
     return true
-  }, [workspaceName, workspacePath, cues, saveSucceeded])
+  }, [workspaceName, workspacePath, cues, audioSettings, midiSettings, saveSucceeded])
 
   const saveAs = useCallback(async (): Promise<boolean> => {
-    const ws = buildWorkspace(workspaceName, cues)
+    const ws = buildWorkspace(workspaceName, cues, audioSettings, midiSettings)
     const savedPath = await window.winslab.workspace.saveAs(ws)
     if (!savedPath) return false
     saveSucceeded(savedPath, workspaceName)
     return true
-  }, [workspaceName, cues, saveSucceeded])
+  }, [workspaceName, cues, audioSettings, midiSettings, saveSucceeded])
 
   return { workspaceName, workspacePath, isDirty, newWorkspace, openWorkspace, openRecent, save, saveAs, setWorkspaceName }
 }

@@ -159,6 +159,15 @@
   accent-color: var(--accent-blue);
 }
 
+.field-row input[type='range'] {
+  padding: 0;
+  border: none;
+  background: transparent;
+  height: auto;
+  border-radius: 0;
+  accent-color: var(--accent-blue);
+}
+
 .field-section-title {
   font-size: var(--text-xs);
   font-weight: var(--fw-bold);

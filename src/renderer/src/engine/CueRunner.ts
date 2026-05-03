@@ -182,6 +182,8 @@ export class CueRunner {
   private executeFade(cue: FadeCue, onDone: () => void): void {
     if (cue.fadeProperty === 'volume') {
       audioPlayer.setVolume(cue.targetCueId, cue.targetValue, cue.duration)
+    } else if (cue.fadeProperty === 'pan') {
+      audioPlayer.setPan(cue.targetCueId, cue.targetValue, cue.duration)
     }
     const t = setTimeout(() => {
       if (cue.stopTargetWhenDone) this.stop(cue.targetCueId)

@@ -205,3 +205,44 @@ describe('store — duplicateCue', () => {
     expect(useStore.getState().selectedId).toBe(copyId)
   })
 })
+
+describe('store — settings', () => {
+  beforeEach(() => {
+    useStore.setState({
+      audioSettings: { outputDeviceId: 'default', sampleRate: 48000, bufferSize: 256 },
+      midiSettings: { outputPortName: '', inputPortName: '' },
+    })
+  })
+
+  it('updateAudioSettings merges patch into audioSettings', () => {
+    useStore.getState().updateAudioSettings({ outputDeviceId: 'device-123' })
+    expect(useStore.getState().audioSettings.outputDeviceId).toBe('device-123')
+    expect(useStore.getState().audioSettings.sampleRate).toBe(48000)
+  })
+
+  it('updateMidiSettings merges patch into midiSettings', () => {
+    useStore.getState().updateMidiSettings({ outputPortName: 'IAC Driver Bus 1' })
+    expect(useStore.getState().midiSettings.outputPortName).toBe('IAC Driver Bus 1')
+    expect(useStore.getState().midiSettings.inputPortName).toBe('')
+  })
+
+  it('updateAudioSettings marks workspace dirty', () => {
+    useStore.setState({ isDirty: false })
+    useStore.getState().updateAudioSettings({ outputDeviceId: 'x' })
+    expect(useStore.getState().isDirty).toBe(true)
+  })
+
+  it('loadWorkspace restores audioSettings when provided', () => {
+    const audioSettings = { outputDeviceId: 'hw-1', sampleRate: 44100, bufferSize: 512 }
+    const midiSettings = { outputPortName: 'Port A', inputPortName: '' }
+    useStore.getState().loadWorkspace([], 'Test', null, audioSettings, midiSettings)
+    expect(useStore.getState().audioSettings).toEqual(audioSettings)
+    expect(useStore.getState().midiSettings).toEqual(midiSettings)
+  })
+
+  it('loadWorkspace falls back to defaults when settings are omitted', () => {
+    useStore.getState().loadWorkspace([], 'Test', null)
+    expect(useStore.getState().audioSettings.outputDeviceId).toBe('default')
+    expect(useStore.getState().midiSettings.outputPortName).toBe('')
+  })
+})

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { Cue, CueType, AudioCue, GroupCue } from '../types/cue'
+import type { AudioSettings, MidiSettings } from '../types/workspace'
 import { createCue } from '../utils/cueDefaults'
 
 export type RunState = 'idle' | 'pre-wait' | 'playing' | 'post-wait'
@@ -11,11 +12,26 @@ export interface RunningCue {
   progress: number
 }
 
+const defaultAudioSettings: AudioSettings = {
+  outputDeviceId: 'default',
+  sampleRate: 48000,
+  bufferSize: 256,
+}
+
+const defaultMidiSettings: MidiSettings = {
+  outputPortName: '',
+  inputPortName: '',
+}
+
 interface CueListState {
   // Workspace metadata
   workspaceName: string
   workspacePath: string | null
   isDirty: boolean
+
+  // Settings
+  audioSettings: AudioSettings
+  midiSettings: MidiSettings
 
   // Cue data
   cues: Cue[]
@@ -38,8 +54,12 @@ interface CueListState {
   clearAllRunning: () => void
   syncCueDuration: (id: string, durationMs: number) => void
 
+  // Settings
+  updateAudioSettings: (patch: Partial<AudioSettings>) => void
+  updateMidiSettings: (patch: Partial<MidiSettings>) => void
+
   // Workspace lifecycle
-  loadWorkspace: (cues: Cue[], name: string, path: string | null) => void
+  loadWorkspace: (cues: Cue[], name: string, path: string | null, audioSettings?: AudioSettings, midiSettings?: MidiSettings) => void
   saveSucceeded: (path: string, name: string) => void
   setWorkspaceName: (name: string) => void
 }
@@ -57,6 +77,9 @@ export const useStore = create<CueListState>((set) => ({
   workspaceName: 'Untitled',
   workspacePath: null,
   isDirty: false,
+
+  audioSettings: { ...defaultAudioSettings },
+  midiSettings: { ...defaultMidiSettings },
 
   cues: [],
   selectedId: null,
@@ -189,13 +212,15 @@ export const useStore = create<CueListState>((set) => ({
     return { cues: s.cues.map(c => c.id === id ? { ...c, duration: durationMs } : c) }
   }),
 
-  loadWorkspace: (cues, name, path) => set({
+  loadWorkspace: (cues, name, path, audioSettings, midiSettings) => set({
     cues,
     workspaceName: name,
     workspacePath: path,
     isDirty: false,
     selectedId: cues.find(c => c.parentId === null)?.id ?? cues[0]?.id ?? null,
-    running: new Map()
+    running: new Map(),
+    audioSettings: audioSettings ?? { ...defaultAudioSettings },
+    midiSettings: midiSettings ?? { ...defaultMidiSettings },
   }),
 
   saveSucceeded: (path, name) => set({
@@ -204,7 +229,17 @@ export const useStore = create<CueListState>((set) => ({
     isDirty: false
   }),
 
-  setWorkspaceName: (name) => set({ workspaceName: name, isDirty: true })
+  setWorkspaceName: (name) => set({ workspaceName: name, isDirty: true }),
+
+  updateAudioSettings: (patch) => set(s => ({
+    audioSettings: { ...s.audioSettings, ...patch },
+    isDirty: true
+  })),
+
+  updateMidiSettings: (patch) => set(s => ({
+    midiSettings: { ...s.midiSettings, ...patch },
+    isDirty: true
+  }))
 }))
 
 export function useSelectedCue(): Cue | null {
