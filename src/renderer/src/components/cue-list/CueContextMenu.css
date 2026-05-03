@@ -1,0 +1,54 @@
+.cue-context-menu {
+  position: fixed;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-menu);
+  padding: var(--space-1) 0;
+  min-width: 160px;
+  z-index: 1000;
+}
+
+.cue-context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: 6px 14px;
+  background: transparent;
+  border: none;
+  color: var(--fg-secondary);
+  font-size: var(--text-base);
+  font-family: inherit;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.cue-context-menu-item:hover {
+  background: var(--bg-hover);
+  color: var(--fg-primary);
+}
+
+.cue-context-menu-item--danger:hover {
+  color: var(--color-red, #e05c5c);
+}
+
+.cue-context-menu-item kbd {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--fg-dim);
+  font-family: inherit;
+}
+
+.cue-context-menu-icon {
+  font-size: var(--text-md);
+  color: var(--fg-dim);
+  width: 16px;
+  text-align: center;
+}
+
+.cue-context-menu-separator {
+  height: 1px;
+  background: var(--border);
+  margin: var(--space-1) 0;
+}

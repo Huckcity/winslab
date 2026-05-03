@@ -42,7 +42,7 @@ test('expanding the group shows its children again', async () => {
 
 test('deleting the selected child removes it from the group', async () => {
   await page.locator('.cue-row[data-depth="1"]').click()
-  await page.locator('.cue-list-container').press('Backspace')
+  await page.locator('.cue-list-container').press('Meta+Backspace')
   await expect(page.locator('.cue-row')).toHaveCount(1)
   await expect(page.locator('.cue-row[data-depth="1"]')).toHaveCount(0)
 })
@@ -56,6 +56,6 @@ test('deleting the group removes all its children too', async () => {
 
   // Select the group header and delete it — children should go too
   await page.locator('.cue-row[data-depth="0"]').click()
-  await page.locator('.cue-list-container').press('Backspace')
+  await page.locator('.cue-list-container').press('Meta+Backspace')
   await expect(page.locator('.cue-row')).toHaveCount(0)
 })
