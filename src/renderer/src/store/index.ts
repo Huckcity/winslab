@@ -38,6 +38,10 @@ interface CueListState {
   selectedId: string | null
   running: Map<string, RunningCue>
 
+  // Undo / redo history (snapshots of cues[])
+  past: Cue[][]
+  future: Cue[][]
+
   // Cue CRUD
   addCue: (type: CueType, afterId?: string) => void
   addAudioCuesFromFiles: (files: Array<{ filePath: string; name: string }>, afterId?: string) => void
@@ -58,10 +62,32 @@ interface CueListState {
   updateAudioSettings: (patch: Partial<AudioSettings>) => void
   updateMidiSettings: (patch: Partial<MidiSettings>) => void
 
+  // Undo / redo
+  undo: () => void
+  redo: () => void
+
   // Workspace lifecycle
   loadWorkspace: (cues: Cue[], name: string, path: string | null, audioSettings?: AudioSettings, midiSettings?: MidiSettings) => void
   saveSucceeded: (path: string, name: string) => void
   setWorkspaceName: (name: string) => void
+}
+
+const HISTORY_LIMIT = 50
+
+function pushPast(past: Cue[][], snapshot: Cue[]): Cue[][] {
+  return [...past.slice(-(HISTORY_LIMIT - 1)), snapshot]
+}
+
+// Coalesce rapid updateCue calls for the same cue into one history entry.
+let _coalesceId: string | null = null
+let _coalesceTime = 0
+
+function shouldRecordUpdate(cueId: string): boolean {
+  const now = Date.now()
+  const record = cueId !== _coalesceId || now - _coalesceTime > 1000
+  _coalesceId = cueId
+  _coalesceTime = now
+  return record
 }
 
 // Returns the flat index of the last child belonging to groupId,
@@ -84,6 +110,8 @@ export const useStore = create<CueListState>((set) => ({
   cues: [],
   selectedId: null,
   running: new Map(),
+  past: [],
+  future: [],
 
   addCue: (type, afterId) => set(s => {
     const cue = createCue(type)
@@ -106,7 +134,7 @@ export const useStore = create<CueListState>((set) => ({
     }
 
     cues.splice(insertIdx, 0, cue)
-    return { cues, selectedId: cue.id, isDirty: true }
+    return { cues, selectedId: cue.id, isDirty: true, past: pushPast(s.past, s.cues), future: [] }
   }),
 
   addAudioCuesFromFiles: (files, afterId) => set(s => {
@@ -135,7 +163,7 @@ export const useStore = create<CueListState>((set) => ({
     }))
     cues.splice(insertIdx, 0, ...newCues)
     const lastAdded = newCues[newCues.length - 1]
-    return { cues, selectedId: lastAdded.id, isDirty: true }
+    return { cues, selectedId: lastAdded.id, isDirty: true, past: pushPast(s.past, s.cues), future: [] }
   }),
 
   removeCue: (id) => set(s => {
@@ -147,14 +175,21 @@ export const useStore = create<CueListState>((set) => ({
     return {
       cues: s.cues.filter(c => !toRemove.has(c.id)),
       selectedId: toRemove.has(s.selectedId ?? '') ? null : s.selectedId,
-      isDirty: true
+      isDirty: true,
+      past: pushPast(s.past, s.cues),
+      future: [],
     }
   }),
 
-  updateCue: (id, patch) => set(s => ({
-    cues: s.cues.map(c => c.id === id ? { ...c, ...patch } as Cue : c),
-    isDirty: true
-  })),
+  updateCue: (id, patch) => set(s => {
+    const record = shouldRecordUpdate(id)
+    return {
+      cues: s.cues.map(c => c.id === id ? { ...c, ...patch } as Cue : c),
+      isDirty: true,
+      past: record ? pushPast(s.past, s.cues) : s.past,
+      future: record ? [] : s.future,
+    }
+  }),
 
   // toIndex is the insertion index AFTER fromIndex has been removed from the array.
   moveCue: (fromIndex, toIndex, newParentId) => set(s => {
@@ -162,7 +197,7 @@ export const useStore = create<CueListState>((set) => ({
     const [moved] = cues.splice(fromIndex, 1)
     const parentId = newParentId !== undefined ? newParentId : moved.parentId
     cues.splice(toIndex, 0, { ...moved, parentId })
-    return { cues, isDirty: true }
+    return { cues, isDirty: true, past: pushPast(s.past, s.cues), future: [] }
   }),
 
   duplicateCue: (id) => set(s => {
@@ -192,7 +227,21 @@ export const useStore = create<CueListState>((set) => ({
     const insertAfter = isGroup ? lastChildIndex([...s.cues], id) : srcIdx
     const cues = [...s.cues]
     cues.splice(insertAfter + 1, 0, ...copies)
-    return { cues, selectedId: copies[0].id, isDirty: true }
+    return { cues, selectedId: copies[0].id, isDirty: true, past: pushPast(s.past, s.cues), future: [] }
+  }),
+
+  undo: () => set(s => {
+    if (s.past.length === 0) return s
+    const past = [...s.past]
+    const cues = past.pop()!
+    return { cues, past, future: [s.cues, ...s.future.slice(0, HISTORY_LIMIT - 1)] }
+  }),
+
+  redo: () => set(s => {
+    if (s.future.length === 0) return s
+    const future = [...s.future]
+    const cues = future.shift()!
+    return { cues, future, past: pushPast(s.past, s.cues) }
   }),
 
   select: (id) => set({ selectedId: id }),
@@ -221,6 +270,8 @@ export const useStore = create<CueListState>((set) => ({
     running: new Map(),
     audioSettings: audioSettings ?? { ...defaultAudioSettings },
     midiSettings: midiSettings ?? { ...defaultMidiSettings },
+    past: [],
+    future: [],
   }),
 
   saveSucceeded: (path, name) => set({

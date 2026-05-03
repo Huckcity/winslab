@@ -246,3 +246,116 @@ describe('store — settings', () => {
     expect(useStore.getState().midiSettings.outputPortName).toBe('')
   })
 })
+
+describe('store — undo/redo', () => {
+  beforeEach(() => {
+    useStore.setState({ cues: [], selectedId: null, running: new Map(), past: [], future: [] })
+  })
+
+  it('undo after addCue restores the empty list', () => {
+    useStore.getState().addCue('wait')
+    expect(useStore.getState().cues).toHaveLength(1)
+    useStore.getState().undo()
+    expect(useStore.getState().cues).toHaveLength(0)
+  })
+
+  it('undo after removeCue restores the cue', () => {
+    useStore.getState().addCue('wait')
+    const id = useStore.getState().cues[0].id
+    useStore.getState().removeCue(id)
+    expect(useStore.getState().cues).toHaveLength(0)
+    useStore.getState().undo()
+    expect(useStore.getState().cues).toHaveLength(1)
+  })
+
+  it('undo after duplicateCue removes the copy', () => {
+    useStore.getState().addCue('wait')
+    const id = useStore.getState().cues[0].id
+    useStore.getState().duplicateCue(id)
+    expect(useStore.getState().cues).toHaveLength(2)
+    useStore.getState().undo()
+    expect(useStore.getState().cues).toHaveLength(1)
+    expect(useStore.getState().cues[0].id).toBe(id)
+  })
+
+  it('undo is a no-op when history is empty', () => {
+    useStore.getState().undo()
+    expect(useStore.getState().cues).toHaveLength(0)
+  })
+
+  it('redo restores the state that was undone', () => {
+    useStore.getState().addCue('wait')
+    useStore.getState().undo()
+    expect(useStore.getState().cues).toHaveLength(0)
+    useStore.getState().redo()
+    expect(useStore.getState().cues).toHaveLength(1)
+  })
+
+  it('redo is a no-op when future is empty', () => {
+    useStore.getState().addCue('wait')
+    useStore.getState().redo() // no-op
+    expect(useStore.getState().cues).toHaveLength(1)
+  })
+
+  it('new mutation clears redo stack', () => {
+    useStore.getState().addCue('wait')
+    useStore.getState().undo()
+    useStore.getState().addCue('audio') // new action after undo
+    expect(useStore.getState().future).toHaveLength(0)
+    // redo should be a no-op
+    useStore.getState().redo()
+    expect(useStore.getState().cues).toHaveLength(1)
+    expect(useStore.getState().cues[0].type).toBe('audio')
+  })
+
+  it('multiple undos step back through history', () => {
+    useStore.getState().addCue('wait')
+    useStore.getState().addCue('audio')
+    useStore.getState().addCue('midi')
+    expect(useStore.getState().cues).toHaveLength(3)
+    useStore.getState().undo()
+    expect(useStore.getState().cues).toHaveLength(2)
+    useStore.getState().undo()
+    expect(useStore.getState().cues).toHaveLength(1)
+    useStore.getState().undo()
+    expect(useStore.getState().cues).toHaveLength(0)
+  })
+
+  it('updateCue coalesces rapid calls for the same cue into one history entry', () => {
+    useStore.getState().addCue('wait')
+    const id = useStore.getState().cues[0].id
+    const originalName = useStore.getState().cues[0].name
+
+    // First call records history; rapid follow-ups do not
+    useStore.getState().updateCue(id, { name: 'A' })
+    useStore.getState().updateCue(id, { name: 'AB' })
+    useStore.getState().updateCue(id, { name: 'ABC' })
+
+    // One undo should restore state before 'A' was set
+    useStore.getState().undo()
+    expect(useStore.getState().cues[0].name).toBe(originalName)
+  })
+
+  it('updateCue records separate history for different cues', () => {
+    useStore.getState().addCue('wait')
+    useStore.getState().addCue('audio')
+    const [c1, c2] = useStore.getState().cues
+
+    useStore.getState().updateCue(c1.id, { name: 'First' })
+    useStore.getState().updateCue(c2.id, { name: 'Second' }) // different cue → new entry
+
+    useStore.getState().undo()
+    expect(useStore.getState().cues.find(c => c.id === c2.id)?.name).not.toBe('Second')
+    expect(useStore.getState().cues.find(c => c.id === c1.id)?.name).toBe('First')
+  })
+
+  it('loadWorkspace clears undo and redo stacks', () => {
+    useStore.getState().addCue('wait')
+    useStore.getState().addCue('audio')
+    expect(useStore.getState().past.length).toBeGreaterThan(0)
+
+    useStore.getState().loadWorkspace([], 'Fresh', null)
+    expect(useStore.getState().past).toHaveLength(0)
+    expect(useStore.getState().future).toHaveLength(0)
+  })
+})

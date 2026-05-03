@@ -59,6 +59,8 @@ export function CueList() {
   const duplicateCue = useStore(s => s.duplicateCue)
   const moveCue = useStore(s => s.moveCue)
   const addAudioCuesFromFiles = useStore(s => s.addAudioCuesFromFiles)
+  const undo = useStore(s => s.undo)
+  const redo = useStore(s => s.redo)
 
   // Collapse state is local UI state — not persisted to workspace
   const [collapsedGroupIds, setCollapsedGroupIds] = useState<Set<string>>(new Set())
@@ -261,6 +263,17 @@ export function CueList() {
       if (ctxMenu) { closeCtxMenu(); return }
     }
 
+    if (e.key === 'z' && e.metaKey && !e.shiftKey) {
+      e.preventDefault()
+      undo()
+      return
+    }
+    if (e.key === 'z' && e.metaKey && e.shiftKey) {
+      e.preventDefault()
+      redo()
+      return
+    }
+
     const renderIdx = renderItems.findIndex(item => item.cue.id === selectedId)
 
     if (e.key === 'ArrowDown' && renderIdx < renderItems.length - 1) {
@@ -272,7 +285,7 @@ export function CueList() {
     } else if (e.key === 'd' && e.metaKey) {
       if (selectedId) duplicateCue(selectedId)
     }
-  }, [renderItems, selectedId, select, removeCue, duplicateCue, ctxMenu, closeCtxMenu])
+  }, [renderItems, selectedId, select, removeCue, duplicateCue, ctxMenu, closeCtxMenu, undo, redo])
 
   // ── Drop indicator ────────────────────────────────────────────────────────
 
