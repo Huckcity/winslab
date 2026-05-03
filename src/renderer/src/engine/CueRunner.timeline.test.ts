@@ -9,6 +9,7 @@ vi.mock('./AudioPlayer', () => ({
     stop: vi.fn(),
     stopAll: vi.fn(),
     setVolume: vi.fn(),
+    isPlaying: vi.fn(() => false),
   }
 }))
 
@@ -275,6 +276,33 @@ describe('CueRunner — timeline group mode', () => {
 
     vi.advanceTimersByTime(2) // push past 500ms — timer fires
     expect(setRunning.mock.calls.some(c => c[0] === 'c1' && c[1] === null)).toBe(true)
+  })
+
+  it('seek while playing: still works when all timeline timers have already fired (audio actively playing)', () => {
+    const group = makeGroup('g1')
+    const a1 = makeAudio('a1', 'g1', { timelineOffset: 0 })
+    const a2 = makeAudio('a2', 'g1', { timelineOffset: 5000 })
+    const { runner } = setup([group, a1, a2])
+
+    runner.go()
+    vi.runAllTimers() // all :timeline timers consumed — audio "playing" via audioPlayer
+
+    // Simulate both audio nodes active in AudioPlayer
+    vi.mocked(audioPlayer.isPlaying).mockImplementation(id => id === 'a1' || id === 'a2')
+
+    ;(audioPlayer.play as ReturnType<typeof vi.fn>).mockClear()
+    runner.seekTimeline('g1', 7000) // a2 started at 5s, so 2s in; a1 started at 0, 7s in
+
+    expect(audioPlayer.play).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'a1', startTime: 7000 }),
+      expect.any(Function),
+      expect.any(Function)
+    )
+    expect(audioPlayer.play).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'a2', startTime: 2000 }),
+      expect.any(Function),
+      expect.any(Function)
+    )
   })
 
   it('getGroupStartOffset returns 0 when no seek set', () => {

@@ -304,7 +304,8 @@ export class CueRunner {
       this.timers.has(c.id + ':timeline') ||
       this.timers.has(c.id + ':pre') ||
       this.timers.has(c.id) ||
-      this.timers.has(c.id + ':post')
+      this.timers.has(c.id + ':post') ||
+      audioPlayer.isPlaying(c.id)
     )
     if (wasPlaying) {
       this.stop(groupId)
