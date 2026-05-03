@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="100" viewBox="0 0 420 100">
+  <rect width="420" height="100" fill="#181818"></rect>
+  <rect x="25.96" y="41.26" width="7.28" height="17.47" rx="1.82" fill="#e0a020" opacity="0.6"></rect>
+    <rect x="37.16" y="34.28" width="7.28" height="31.45" rx="1.82" fill="#e0a020" opacity="0.8"></rect>
+    <rect x="48.36" y="28.16" width="7.28" height="43.68" rx="1.82" fill="#e0a020" opacity="1"></rect>
+    <rect x="59.56" y="37.33" width="7.28" height="25.33" rx="1.82" fill="#e0a020" opacity="0.75"></rect>
+    <rect x="70.76" y="43.88" width="7.28" height="12.23" rx="1.82" fill="#e0a020" opacity="0.55"></rect>
+  <text x="98" y="61.519999999999996" font-family="&#39;Segoe UI&#39;, -apple-system, BlinkMacSystemFont, sans-serif" font-size="32" font-weight="700" fill="#e0a020" letter-spacing="3.2" text-anchor="start">WINSLAB</text>
+  <text x="100" y="75.52" font-family="&#39;Segoe UI&#39;, -apple-system, BlinkMacSystemFont, sans-serif" font-size="9" font-weight="600" fill="#555555" letter-spacing="3.5" text-anchor="start">SHOW CONTROL FOR WINDOWS</text>
+</svg>

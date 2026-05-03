@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="180" viewBox="0 0 260 180">
+  <rect width="260" height="180" fill="#181818"></rect>
+  <rect x="100.24" y="46.02" width="8.32" height="19.97" rx="2.08" fill="#e0a020" opacity="0.6"></rect>
+    <rect x="113.04" y="38.03" width="8.32" height="35.94" rx="2.08" fill="#e0a020" opacity="0.8"></rect>
+    <rect x="125.84" y="31.04" width="8.32" height="49.92" rx="2.08" fill="#e0a020" opacity="1"></rect>
+    <rect x="138.64" y="41.52" width="8.32" height="28.95" rx="2.08" fill="#e0a020" opacity="0.75"></rect>
+    <rect x="151.44" y="49.01" width="8.32" height="13.98" rx="2.08" fill="#e0a020" opacity="0.55"></rect>
+  <line x1="85" y1="98" x2="175" y2="98" stroke="#e0a020" stroke-width="1" opacity="0.2"></line>
+  <text x="130" y="128.1" font-family="&#39;Segoe UI&#39;, -apple-system, BlinkMacSystemFont, sans-serif" font-size="26" font-weight="700" fill="#e0a020" letter-spacing="4" text-anchor="middle">WINSLAB</text>
+  <text x="130" y="146.1" font-family="&#39;Segoe UI&#39;, -apple-system, BlinkMacSystemFont, sans-serif" font-size="8" font-weight="600" fill="#555555" letter-spacing="2.5" text-anchor="middle">SHOW CONTROL</text>
+</svg>
