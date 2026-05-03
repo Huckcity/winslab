@@ -202,28 +202,76 @@ export class CueRunner {
     if (cue.mode === 'timeline') {
       const startOffset = this.groupStartOffsets.get(cue.id) ?? 0
       this.groupStartOffsets.delete(cue.id)
-
-      // Correct startedAt so the playhead reflects the seek position
-      this.deps!.setRunning(cue.id, { cueId: cue.id, state: 'playing', startedAt: Date.now() - startOffset, progress: 0 })
-
-      const scheduled = children.filter(c => c.timelineOffset >= startOffset)
-      if (scheduled.length === 0) { onDone(); return }
-      let remaining = scheduled.length
-      for (const child of scheduled) {
-        const t = setTimeout(() => {
-          this.timers.delete(child.id + ':timeline')
-          this.fireCue(child, () => {
-            remaining--
-            if (remaining === 0) onDone()
-          })
-        }, child.timelineOffset - startOffset)
-        this.timers.set(child.id + ':timeline', t)
-      }
+      this.executeGroupTimeline(cue, children, onDone, startOffset)
     } else if (cue.mode === 'random') {
       this.fireCue(children[Math.floor(Math.random() * children.length)], onDone)
     } else {
       // sequence and playlist both run children in order
       this.runSequence(children, 0, onDone)
+    }
+  }
+
+  private executeGroupTimeline(cue: GroupCue, children: Cue[], onDone: () => void, startOffset: number): void {
+    const { setRunning } = this.deps!
+
+    // Correct startedAt so the playhead reflects the seek position
+    setRunning(cue.id, { cueId: cue.id, state: 'playing', startedAt: Date.now() - startOffset, progress: 0 })
+
+    type Item =
+      | { kind: 'schedule'; child: Cue; delay: number }
+      | { kind: 'seek';     child: Cue; seekOffsetMs: number }
+
+    const items: Item[] = []
+    for (const child of children) {
+      if (child.timelineOffset >= startOffset) {
+        items.push({ kind: 'schedule', child, delay: child.timelineOffset - startOffset })
+      } else {
+        const seekOffsetMs = startOffset - child.timelineOffset
+        // Skip if we know the cue has already finished
+        if (child.duration > 0 && seekOffsetMs >= child.duration) continue
+        // Fire-and-forget types have already happened — don't replay
+        if (child.type === 'midi' || child.type === 'osc' ||
+            child.type === 'network' || child.type === 'script' || child.type === 'stop') continue
+        items.push({ kind: 'seek', child, seekOffsetMs })
+      }
+    }
+
+    if (items.length === 0) { onDone(); return }
+    let remaining = items.length
+
+    for (const item of items) {
+      if (item.kind === 'schedule') {
+        const { child, delay } = item
+        const t = setTimeout(() => {
+          this.timers.delete(child.id + ':timeline')
+          this.fireCue(child, () => { remaining--; if (remaining === 0) onDone() })
+        }, delay)
+        this.timers.set(child.id + ':timeline', t)
+      } else {
+        const { child, seekOffsetMs } = item
+        this.fireCueFromOffset(child, seekOffsetMs, () => { remaining--; if (remaining === 0) onDone() })
+      }
+    }
+  }
+
+  private fireCueFromOffset(cue: Cue, seekOffsetMs: number, onDone: () => void): void {
+    const { setRunning, syncCueDuration } = this.deps!
+
+    if (cue.type === 'audio') {
+      const audioCue = cue as AudioCue
+      setRunning(cue.id, { cueId: cue.id, state: 'playing', startedAt: Date.now() - seekOffsetMs, progress: 0 })
+      audioPlayer.play(
+        { ...audioCue, startTime: audioCue.startTime + seekOffsetMs },
+        () => { setRunning(cue.id, null); onDone() },
+        durationMs => syncCueDuration(cue.id, durationMs)
+      ).catch(() => { setRunning(cue.id, null); onDone() })
+    } else if (cue.type === 'wait') {
+      const remainingMs = Math.max(0, (cue as WaitCue).duration - seekOffsetMs)
+      setRunning(cue.id, { cueId: cue.id, state: 'playing', startedAt: Date.now() - seekOffsetMs, progress: 0 })
+      const t = setTimeout(() => { setRunning(cue.id, null); onDone() }, remainingMs)
+      this.timers.set(cue.id, t)
+    } else {
+      onDone()
     }
   }
 
@@ -260,7 +308,8 @@ export class CueRunner {
     )
     if (wasPlaying) {
       this.stop(groupId)
-      this.executeGroup(group as GroupCue, () => {})
+      const armedChildren = children.filter(c => c.isArmed)
+      this.executeGroupTimeline(group as GroupCue, armedChildren, () => {}, seekMs)
     }
   }
 

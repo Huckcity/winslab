@@ -1,9 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { CueRunner } from './CueRunner'
-import type { Cue, WaitCue, GroupCue } from '../types/cue'
+import { audioPlayer } from './AudioPlayer'
+import type { Cue, WaitCue, AudioCue, GroupCue } from '../types/cue'
 
 vi.mock('./AudioPlayer', () => ({
-  audioPlayer: { play: vi.fn(), stop: vi.fn(), stopAll: vi.fn(), setVolume: vi.fn() }
+  audioPlayer: {
+    play: vi.fn().mockResolvedValue(undefined),
+    stop: vi.fn(),
+    stopAll: vi.fn(),
+    setVolume: vi.fn(),
+  }
 }))
 
 function makeGroup(id: string, overrides: Partial<GroupCue> = {}): GroupCue {
@@ -21,6 +27,19 @@ function makeWait(id: string, parentId: string, overrides: Partial<WaitCue> = {}
     id, number: id, name: id, type: 'wait',
     colorLabel: 'none', parentId, preWait: 0, postWait: 0, timelineOffset: 0, duration: 100,
     advance: 'none', isArmed: true, notes: '',
+    ...overrides
+  }
+}
+
+function makeAudio(id: string, parentId: string, overrides: Partial<AudioCue> = {}): AudioCue {
+  return {
+    id, number: id, name: id, type: 'audio',
+    colorLabel: 'none', parentId, preWait: 0, postWait: 0, timelineOffset: 0, duration: 0,
+    advance: 'none', isArmed: true, notes: '',
+    filePath: '/test.wav', startTime: 0, endTime: null,
+    fadeInDuration: 0, fadeOutDuration: 0,
+    outputs: [{ deviceId: 'default', channelPair: [1, 2] as [number, number], volume: 1, pan: 0 }],
+    loopCount: 0,
     ...overrides
   }
 }
@@ -139,52 +158,123 @@ describe('CueRunner — timeline group mode', () => {
     expect(firedC1).toHaveLength(0)
   })
 
-  it('seekTimeline while stopped stores offset for next go', () => {
+  // ── Seek behaviour ──────────────────────────────────────────────────────────
+
+  it('seek while stopped: cues after seek point are scheduled with adjusted delay', () => {
     const group = makeGroup('g1')
-    // c1 at 0ms, c2 at 500ms — seek to 600ms skips both
-    const c1 = makeWait('c1', 'g1', { timelineOffset: 0, duration: 100 })
+    const c1 = makeWait('c1', 'g1', { timelineOffset: 0,   duration: 100 })
     const c2 = makeWait('c2', 'g1', { timelineOffset: 500, duration: 100 })
     const { runner, setRunning } = setup([group, c1, c2])
 
-    runner.seekTimeline('g1', 600)
+    runner.seekTimeline('g1', 300) // c1 done (100ms), c2 fires 200ms after seek
+    runner.go()
+    vi.advanceTimersByTime(250)    // 200ms adjusted delay for c2 has elapsed
+
+    const playing = setRunning.mock.calls.filter(c => c[1]?.state === 'playing').map(c => c[0])
+    expect(playing).not.toContain('c1')
+    expect(playing).toContain('c2')
+  })
+
+  it('seek while stopped: cues fully before seek point are skipped', () => {
+    const group = makeGroup('g1')
+    const c1 = makeWait('c1', 'g1', { timelineOffset: 0,   duration: 100 })
+    const c2 = makeWait('c2', 'g1', { timelineOffset: 500, duration: 100 })
+    const { runner, setRunning } = setup([group, c1, c2])
+
+    runner.seekTimeline('g1', 650) // both cues have finished by 650ms
     runner.go()
     vi.runAllTimers()
 
-    const fired = setRunning.mock.calls.filter(c => c[1]?.state === 'playing').map(c => c[0])
-    expect(fired).not.toContain('c1')
-    expect(fired).not.toContain('c2')
+    const played = setRunning.mock.calls.filter(c => c[1]?.state === 'playing').map(c => c[0])
+    expect(played).not.toContain('c1')
+    expect(played).not.toContain('c2')
   })
 
-  it('seekTimeline while stopped — children past offset still fire', () => {
+  it('seek while stopped: in-progress wait cue plays its remaining duration', () => {
     const group = makeGroup('g1')
-    const c1 = makeWait('c1', 'g1', { timelineOffset: 0, duration: 100 })
-    const c2 = makeWait('c2', 'g1', { timelineOffset: 500, duration: 100 })
-    const { runner, setRunning } = setup([group, c1, c2])
+    // c1 starts at 0ms and runs for 1000ms — seek to 600ms leaves 400ms remaining
+    const c1 = makeWait('c1', 'g1', { timelineOffset: 0, duration: 1000 })
+    const { runner, setRunning } = setup([group, c1])
 
-    runner.seekTimeline('g1', 300) // skip c1 (at 0), c2 (at 500) fires after 200ms
+    runner.seekTimeline('g1', 600)
     runner.go()
-    vi.advanceTimersByTime(250) // 200ms delay for c2 has elapsed
 
-    const fired = setRunning.mock.calls.filter(c => c[1]?.state === 'playing').map(c => c[0])
-    expect(fired).not.toContain('c1')
-    expect(fired).toContain('c2')
+    vi.advanceTimersByTime(399) // not done yet (400ms remaining)
+    const notDone = setRunning.mock.calls.some(c => c[0] === 'c1' && c[1] === null)
+    expect(notDone).toBe(false)
+
+    vi.advanceTimersByTime(2)   // 401ms total — should be done now
+    const done = setRunning.mock.calls.some(c => c[0] === 'c1' && c[1] === null)
+    expect(done).toBe(true)
   })
 
-  it('seekTimeline while playing stops current playback and restarts from offset', () => {
+  it('seek while stopped: in-progress audio cue plays from correct file offset', () => {
     const group = makeGroup('g1')
-    const c1 = makeWait('c1', 'g1', { timelineOffset: 0, duration: 2000 })
+    // audio at offset 0, seek to 5000ms → should play from startTime+5000 in the file
+    const a1 = makeAudio('a1', 'g1', { timelineOffset: 0, startTime: 1000 })
+    const { runner } = setup([group, a1])
+
+    runner.seekTimeline('g1', 5000)
+    runner.go()
+    vi.runAllTimers()
+
+    expect(audioPlayer.play).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'a1', startTime: 6000 }), // 1000 + 5000
+      expect.any(Function),
+      expect.any(Function)
+    )
+  })
+
+  it('seek while stopped: audio at non-zero timeline offset is played with correct seek', () => {
+    const group = makeGroup('g1')
+    // audio starts at 10000ms in the timeline; seek to 12000ms → 2000ms into the cue
+    const a1 = makeAudio('a1', 'g1', { timelineOffset: 10000, startTime: 0 })
+    const a2 = makeAudio('a2', 'g1', { timelineOffset: 20000, startTime: 0 })
+    const { runner } = setup([group, a1, a2])
+
+    runner.seekTimeline('g1', 12000)
+    runner.go()
+    vi.runAllTimers()
+
+    // a1 is in-progress: should start 2000ms into the file
+    expect(audioPlayer.play).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'a1', startTime: 2000 }),
+      expect.any(Function),
+      expect.any(Function)
+    )
+    // a2 hasn't started yet: should be played from its own startTime (0) with no seek offset
+    expect(audioPlayer.play).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'a2', startTime: 0 }),
+      expect.any(Function),
+      expect.any(Function)
+    )
+  })
+
+  it('seek while playing: stops current playback and resumes in-progress cues from offset', () => {
+    const group = makeGroup('g1')
+    const c1 = makeWait('c1', 'g1', { timelineOffset: 0,    duration: 2000 })
     const c2 = makeWait('c2', 'g1', { timelineOffset: 1000, duration: 100 })
     const { runner, setRunning } = setup([group, c1, c2])
 
     runner.go()
-    vi.advanceTimersByTime(500) // c1 playing, c2 not yet scheduled
+    vi.advanceTimersByTime(500) // c1 playing, c2 pending
 
     setRunning.mockClear()
-    runner.seekTimeline('g1', 1500) // seek past c2's offset — c2 should not fire
-    vi.runAllTimers()
+    runner.seekTimeline('g1', 1500) // seek past c2 (done at 1100ms), c1 has 500ms remaining
+    // stop() → setRunning(c1, null), restart → setRunning(c1, playing)
 
-    const firedAfterSeek = setRunning.mock.calls.filter(c => c[1]?.state === 'playing').map(c => c[0])
-    expect(firedAfterSeek).not.toContain('c2')
+    const c1Restarted = setRunning.mock.calls.some(c => c[0] === 'c1' && c[1]?.state === 'playing')
+    expect(c1Restarted).toBe(true)
+    const c2Restarted = setRunning.mock.calls.some(c => c[0] === 'c2' && c[1]?.state === 'playing')
+    expect(c2Restarted).toBe(false)
+
+    // Verify c1's 500ms remaining timer hasn't fired yet
+    setRunning.mockClear()
+    vi.advanceTimersByTime(499)
+    expect(setRunning.mock.calls.some(c => c[0] === 'c1' && c[1] === null)).toBe(false)
+
+    vi.advanceTimersByTime(2) // push past 500ms — timer fires
+    expect(setRunning.mock.calls.some(c => c[0] === 'c1' && c[1] === null)).toBe(true)
   })
 
   it('getGroupStartOffset returns 0 when no seek set', () => {
