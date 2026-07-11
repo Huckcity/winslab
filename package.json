@@ -1,6 +1,6 @@
 {
   "name": "winslab",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "QLab-style show control for Windows",
   "main": "out/main/index.js",
   "scripts": {
