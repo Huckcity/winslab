@@ -1,3 +1,10 @@
+## [0.4.1](https://github.com/Huckcity/winslab/compare/v0.4.0...v0.4.1) (2026-07-11)
+
+
+### Bug Fixes
+
+* **inspector:** Fade cue properties Target dropdown overflow ([#15](https://github.com/Huckcity/winslab/issues/15)) ([#16](https://github.com/Huckcity/winslab/issues/16)) ([8cdbe21](https://github.com/Huckcity/winslab/commit/8cdbe21ffbaaa42a564ad3be32397271cab593bf))
+
 # [0.4.0](https://github.com/Huckcity/winslab/compare/v0.3.0...v0.4.0) (2026-05-03)
 
 
