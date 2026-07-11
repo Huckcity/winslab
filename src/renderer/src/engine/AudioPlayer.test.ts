@@ -3,11 +3,17 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // AudioPlayer uses Web Audio API — mock AudioContext
 const mockSetValueAtTime = vi.fn()
 const mockLinearRamp = vi.fn()
+const mockCancelScheduledValues = vi.fn()
 const mockSetSinkId = vi.fn().mockResolvedValue(undefined)
+
+let paramValue = 0.8
 
 const makeAudioParam = () => ({
   setValueAtTime: mockSetValueAtTime,
   linearRampToValueAtTime: mockLinearRamp,
+  cancelScheduledValues: mockCancelScheduledValues,
+  get value() { return paramValue },
+  set value(v: number) { paramValue = v },
 })
 
 const mockGain = { gain: makeAudioParam() }
@@ -58,9 +64,48 @@ function makeAudioCue(overrides: Partial<AudioCue> = {}): AudioCue {
   }
 }
 
+describe('AudioPlayer.setVolume', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    paramValue = 0.8
+    ;(audioPlayer as any).active.set('a1', {
+      source: { onended: null, stop: vi.fn() },
+      gain: { gain: makeAudioParam() },
+      panner: { pan: makeAudioParam() },
+      startContextTime: 0,
+      startOffset: 0,
+      bufferDuration: 5,
+      cue: makeAudioCue(),
+      onEnd: undefined,
+    })
+    ;(audioPlayer as any).ctx = mockCtx
+  })
+
+  it('sets volume immediately when durationMs is 0', () => {
+    audioPlayer.setVolume('a1', 0.5)
+    expect(mockCancelScheduledValues).toHaveBeenCalledWith(0)
+    expect(mockSetValueAtTime).toHaveBeenCalledWith(0.5, 0)
+  })
+
+  it('cancels existing automations and ramps volume when durationMs > 0', () => {
+    audioPlayer.setVolume('a1', 0, 2000)
+    expect(mockCancelScheduledValues).toHaveBeenCalledWith(0)
+    expect(mockSetValueAtTime).toHaveBeenCalledWith(0.8, 0)
+    expect(mockLinearRamp).toHaveBeenCalledWith(0, 2)
+  })
+
+  it('does nothing when cueId is not active', () => {
+    audioPlayer.setVolume('nonexistent', 0.5)
+    expect(mockSetValueAtTime).not.toHaveBeenCalled()
+    expect(mockLinearRamp).not.toHaveBeenCalled()
+    expect(mockCancelScheduledValues).not.toHaveBeenCalled()
+  })
+})
+
 describe('AudioPlayer.setPan', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    paramValue = 0.3
     // Inject an active node directly so we can test without playing
     const gain = { gain: makeAudioParam() }
     const panner = { pan: makeAudioParam() }
@@ -79,11 +124,14 @@ describe('AudioPlayer.setPan', () => {
 
   it('sets pan immediately when durationMs is 0', () => {
     audioPlayer.setPan('a1', -0.5)
+    expect(mockCancelScheduledValues).toHaveBeenCalledWith(0)
     expect(mockSetValueAtTime).toHaveBeenCalledWith(-0.5, 0)
   })
 
-  it('ramps pan when durationMs > 0', () => {
+  it('cancels existing automations and ramps pan when durationMs > 0', () => {
     audioPlayer.setPan('a1', 1, 500)
+    expect(mockCancelScheduledValues).toHaveBeenCalledWith(0)
+    expect(mockSetValueAtTime).toHaveBeenCalledWith(0.3, 0)
     expect(mockLinearRamp).toHaveBeenCalledWith(1, 0.5)
   })
 
@@ -91,6 +139,7 @@ describe('AudioPlayer.setPan', () => {
     audioPlayer.setPan('nonexistent', 0.5)
     expect(mockSetValueAtTime).not.toHaveBeenCalled()
     expect(mockLinearRamp).not.toHaveBeenCalled()
+    expect(mockCancelScheduledValues).not.toHaveBeenCalled()
   })
 })
 
