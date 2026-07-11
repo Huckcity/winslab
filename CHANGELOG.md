@@ -1,3 +1,10 @@
+## [0.4.4](https://github.com/Huckcity/winslab/compare/v0.4.3...v0.4.4) (2026-07-11)
+
+
+### Bug Fixes
+
+* **audio:** cancel scheduled automations before fade ramps to prevent level drop ([#11](https://github.com/Huckcity/winslab/issues/11)) ([60e0200](https://github.com/Huckcity/winslab/commit/60e02002b126d88a5ff6ddabc99c3921dd63ca8e))
+
 ## [0.4.3](https://github.com/Huckcity/winslab/compare/v0.4.2...v0.4.3) (2026-07-11)
 
 
