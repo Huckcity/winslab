@@ -21,7 +21,7 @@ jobs:
       - name: Install ALSA dev headers
         run: sudo apt-get install -y libasound2-dev
 
-      - run: npm ci --legacy-peer-deps
+      - run: npm ci --force
 
       - name: Typecheck
         run: npm run typecheck
@@ -39,7 +39,7 @@ jobs:
       - name: Install ALSA dev headers
         run: sudo apt-get install -y libasound2-dev
 
-      - run: npm ci --legacy-peer-deps
+      - run: npm ci --force
 
       - name: Unit tests
         run: npm test
@@ -54,7 +54,7 @@ jobs:
           node-version: 24
           cache: npm
 
-      - run: npm ci --legacy-peer-deps
+      - run: npm ci --force
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
