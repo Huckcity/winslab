@@ -146,8 +146,9 @@ export class CueRunner {
         fetch(cue.url, {
           method: cue.method,
           headers: cue.headers,
-          body: cue.method !== 'GET' ? cue.body : undefined
-        }).finally(onDone)
+          body: cue.method !== 'GET' ? cue.body : undefined,
+          signal: AbortSignal.timeout(cue.timeout ?? 5000)
+        }).finally(() => { this.timers.delete(cue.id); onDone() })
         break
       case 'script':
         try { new Function(cue.script)() } catch (e) { console.error('Script cue error:', e) }

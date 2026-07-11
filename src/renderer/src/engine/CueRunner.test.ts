@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { CueRunner } from './CueRunner'
 import { audioPlayer } from './AudioPlayer'
-import type { Cue, WaitCue, AudioCue, FadeCue, StopCue } from '../types/cue'
+import type { Cue, WaitCue, AudioCue, FadeCue, StopCue, NetworkCue } from '../types/cue'
 import type { RunningCue } from '../store'
 
 vi.mock('./AudioPlayer', () => ({
@@ -344,5 +344,83 @@ describe('CueRunner — stop cue', () => {
     const { runner } = setup([stopCue])
     runner.go()
     expect(audioPlayer.stopAll).toHaveBeenCalledWith(1500)
+  })
+})
+
+describe('CueRunner — network cue', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('ok', { status: 200 })))
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
+  })
+
+  it('calls fetch with url, method, headers, body, and a timeout signal', () => {
+    const networkCue: NetworkCue = {
+      id: 'n1', number: '1', name: 'Network', type: 'network',
+      colorLabel: 'none', preWait: 0, postWait: 0, timelineOffset: 0, duration: 0,
+      advance: 'none', isArmed: true, notes: '',
+      method: 'POST',
+      url: 'https://example.com/api',
+      body: '{"key":"value"}',
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 3000
+    }
+    const { runner } = setup([networkCue])
+    runner.go()
+
+    expect(fetch).toHaveBeenCalledWith('https://example.com/api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{"key":"value"}',
+      signal: expect.any(AbortSignal)
+    })
+  })
+
+  it('uses default 5000ms timeout when cue.timeout is not set', () => {
+    const networkCue: NetworkCue = {
+      id: 'n2', number: '2', name: 'Default Timeout', type: 'network',
+      colorLabel: 'none', preWait: 0, postWait: 0, timelineOffset: 0, duration: 0,
+      advance: 'none', isArmed: true, notes: '',
+      method: 'GET',
+      url: 'https://example.com',
+      body: '',
+      headers: {},
+      timeout: 5000
+    }
+    const { runner } = setup([networkCue])
+    runner.go()
+
+    expect(fetch).toHaveBeenCalledWith('https://example.com', {
+      method: 'GET',
+      headers: {},
+      body: undefined,
+      signal: expect.any(AbortSignal)
+    })
+  })
+
+  it('calls onDone after fetch completes', async () => {
+    const networkCue: NetworkCue = {
+      id: 'n3', number: '3', name: 'Network', type: 'network',
+      colorLabel: 'none', preWait: 0, postWait: 0, timelineOffset: 0, duration: 0,
+      advance: 'on-end', isArmed: true, notes: '',
+      method: 'GET',
+      url: 'https://example.com',
+      body: '',
+      headers: {},
+      timeout: 5000
+    }
+    const cue2 = makeWait({ id: 'w2', number: '4' })
+    const { runner, setRunning } = setup([networkCue, cue2])
+    runner.go()
+
+    // Should not fire next cue until fetch resolves
+    expect(setRunning.mock.calls.map(c => c[0])).not.toContain('w2')
+
+    // Flush microtasks — the mock fetch resolves immediately, so onDone should fire
+    await vi.runAllTimersAsync()
+    expect(setRunning.mock.calls.map(c => c[0])).toContain('w2')
   })
 })
