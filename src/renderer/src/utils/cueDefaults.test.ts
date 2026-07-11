@@ -47,6 +47,12 @@ describe('createCue', () => {
     expect(cue.duration).toBeGreaterThan(0)
   })
 
+  it('fade cue defaults to 3 second duration', () => {
+    const cue = createCue('fade')
+    if (cue.type !== 'fade') throw new Error('wrong type')
+    expect(cue.duration).toBe(3000)
+  })
+
   it('group cue defaults to sequence mode with no parent', () => {
     const cue = createCue('group')
     if (cue.type !== 'group') throw new Error('wrong type')
