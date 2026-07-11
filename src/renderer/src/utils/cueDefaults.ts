@@ -68,7 +68,7 @@ export function createCue(type: CueType): Cue {
         fadeProperty: 'volume',
         targetValue: 0,
         curve: 'linear',
-        stopTargetWhenDone: false
+        stopTargetWhenDone: true
       } satisfies FadeCue
     case 'stop':
       return {
