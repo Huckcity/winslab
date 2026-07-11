@@ -123,7 +123,10 @@ class AudioPlayer {
     const ctx = this.getCtx()
     node.source.onended = null  // prevent spurious onEnd callbacks
     if (fadeMs > 0) {
-      node.gain.gain.linearRampToValueAtTime(0, ctx.currentTime + fadeMs / 1000)
+      const gain = node.gain.gain
+      gain.cancelScheduledValues(ctx.currentTime)
+      gain.setValueAtTime(gain.value, ctx.currentTime)
+      gain.linearRampToValueAtTime(0, ctx.currentTime + fadeMs / 1000)
       setTimeout(() => { try { node.source.stop() } catch { /* ok */ } }, fadeMs)
     } else {
       try { node.source.stop() } catch { /* ok */ }
@@ -139,10 +142,14 @@ class AudioPlayer {
     const node = this.active.get(cueId)
     if (!node) return
     const ctx = this.getCtx()
+    const gain = node.gain.gain
     if (durationMs > 0) {
-      node.gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + durationMs / 1000)
+      gain.cancelScheduledValues(ctx.currentTime)
+      gain.setValueAtTime(gain.value, ctx.currentTime)
+      gain.linearRampToValueAtTime(volume, ctx.currentTime + durationMs / 1000)
     } else {
-      node.gain.gain.setValueAtTime(volume, ctx.currentTime)
+      gain.cancelScheduledValues(ctx.currentTime)
+      gain.setValueAtTime(volume, ctx.currentTime)
     }
   }
 
@@ -150,10 +157,14 @@ class AudioPlayer {
     const node = this.active.get(cueId)
     if (!node) return
     const ctx = this.getCtx()
+    const pannerPan = node.panner.pan
     if (durationMs > 0) {
-      node.panner.pan.linearRampToValueAtTime(pan, ctx.currentTime + durationMs / 1000)
+      pannerPan.cancelScheduledValues(ctx.currentTime)
+      pannerPan.setValueAtTime(pannerPan.value, ctx.currentTime)
+      pannerPan.linearRampToValueAtTime(pan, ctx.currentTime + durationMs / 1000)
     } else {
-      node.panner.pan.setValueAtTime(pan, ctx.currentTime)
+      pannerPan.cancelScheduledValues(ctx.currentTime)
+      pannerPan.setValueAtTime(pan, ctx.currentTime)
     }
   }
 
