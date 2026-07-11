@@ -1,3 +1,12 @@
+## [0.4.2](https://github.com/Huckcity/winslab/compare/v0.4.1...v0.4.2) (2026-07-11)
+
+
+### Bug Fixes
+
+* **app:** About window shows correct version ([#19](https://github.com/Huckcity/winslab/issues/19)) ([902ecb3](https://github.com/Huckcity/winslab/commit/902ecb3fb192332b73ebe277823309ea818500b1))
+* **ci:** regenerate package-lock.json for npm 11 / Node 24 ([#23](https://github.com/Huckcity/winslab/issues/23)) ([ab33e40](https://github.com/Huckcity/winslab/commit/ab33e40b6a042591673b137036a3b2162c779988)), closes [#18](https://github.com/Huckcity/winslab/issues/18)
+* **deps:** Bump vitest to 4.1.10 and @vitest/coverage-v8 to 4.1.10 ([#7](https://github.com/Huckcity/winslab/issues/7)) ([#18](https://github.com/Huckcity/winslab/issues/18)) ([fc9724d](https://github.com/Huckcity/winslab/commit/fc9724d82edee3c4fedc1f381669e1cb2f110072))
+
 ## [0.4.1](https://github.com/Huckcity/winslab/compare/v0.4.0...v0.4.1) (2026-07-11)
 
 
