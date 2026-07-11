@@ -1,3 +1,10 @@
+## [0.4.7](https://github.com/Huckcity/winslab/compare/v0.4.6...v0.4.7) (2026-07-11)
+
+
+### Bug Fixes
+
+* **ci:** trigger Build workflow on release published instead of tag push ([8036654](https://github.com/Huckcity/winslab/commit/8036654d7a7a0ebf4801c1b06c16835684efda35))
+
 ## [0.4.6](https://github.com/Huckcity/winslab/compare/v0.4.5...v0.4.6) (2026-07-11)
 
 
