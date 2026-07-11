@@ -121,7 +121,7 @@
   flex-shrink: 0;
   font-size: var(--text-sm);
   color: var(--fg-muted);
-  text-align: right;
+  text-align: left;
 }
 
 .field-row input,
