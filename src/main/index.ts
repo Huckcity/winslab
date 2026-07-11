@@ -1,7 +1,28 @@
-import { app, BrowserWindow, shell, ipcMain } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerIpcHandlers } from './ipc/handlers'
+
+function createMenu(): void {
+  const template: Electron.MenuItemConstructorOptions[] = [
+    {
+      label: 'WinsLab',
+      submenu: [
+        {
+          label: `About WinsLab`,
+          click: () => {
+            app.showAboutPanel()
+          }
+        },
+        { type: 'separator' },
+        { role: 'quit' }
+      ]
+    }
+  ]
+
+  const menu = Menu.buildFromTemplate(template)
+  Menu.setApplicationMenu(menu)
+}
 
 function createWindow(): void {
   const win = new BrowserWindow({
@@ -53,6 +74,15 @@ function createWindow(): void {
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.winslab')
   app.on('browser-window-created', (_, window) => optimizer.watchWindowShortcuts(window))
+  
+  // Set up about panel with current version
+  app.setAboutPanelOptions({
+    applicationName: 'WinsLab',
+    applicationVersion: app.getVersion(),
+    copyright: 'Copyright © 2026'
+  })
+  
+  createMenu()
   registerIpcHandlers()
   createWindow()
   app.on('activate', () => {
