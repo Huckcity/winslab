@@ -91,7 +91,8 @@ export function createCue(type: CueType): Cue {
         method: 'GET',
         url: 'http://',
         body: '',
-        headers: {}
+        headers: {},
+        timeout: 5000
       } satisfies NetworkCue
     case 'script':
       return {

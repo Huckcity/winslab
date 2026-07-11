@@ -96,6 +96,7 @@ export interface NetworkCue extends CueBase {
   url: string
   body: string
   headers: Record<string, string>
+  timeout: number  // ms, defaults to 5000
 }
 
 export interface ScriptCue extends CueBase {
