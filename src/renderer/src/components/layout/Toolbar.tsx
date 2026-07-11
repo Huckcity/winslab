@@ -38,7 +38,7 @@ export function Toolbar({ onOpenSettings }: Props) {
     }
   }
 
-  const { workspaceName, workspacePath, isDirty, newWorkspace, openWorkspace, save, saveAs, setWorkspaceName } =
+  const { workspaceName, workspacePath, isDirty, newWorkspace, openWorkspace, openRecent, save, saveAs, setWorkspaceName } =
     useWorkspace()
 
   const [fileMenuOpen, setFileMenuOpen] = useState(false)
@@ -124,12 +124,7 @@ export function Toolbar({ onOpenSettings }: Props) {
                     <button
                       key={p}
                       className="file-menu-recent"
-                      onClick={() => handleMenuAction(() =>
-                        window.winslab.workspace.openPath(p).then(r => {
-                          const { cues, name, audioSettings, midiSettings } = r.workspace
-                          useStore.getState().loadWorkspace(cues, name, r.path, audioSettings, midiSettings)
-                        })
-                      )}
+                      onClick={() => handleMenuAction(() => openRecent(p))}
                       title={p}
                     >
                       <span>{p.split('/').pop()}</span>
