@@ -1,3 +1,10 @@
+## [0.4.3](https://github.com/Huckcity/winslab/compare/v0.4.2...v0.4.3) (2026-07-11)
+
+
+### Bug Fixes
+
+* **inspector:** align field labels to left to prevent input misalignment ([#14](https://github.com/Huckcity/winslab/issues/14)) ([749cd87](https://github.com/Huckcity/winslab/commit/749cd8758ec58331b44cbc26cd91ea9f3687573e))
+
 ## [0.4.2](https://github.com/Huckcity/winslab/compare/v0.4.1...v0.4.2) (2026-07-11)
 
 
