@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   test:
@@ -17,14 +17,14 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Install ALSA dev headers
         run: sudo apt-get install -y libasound2-dev
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Unit tests
         run: npm test
@@ -36,11 +36,11 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
@@ -56,11 +56,11 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Build and package
         run: npm run dist:win
@@ -80,11 +80,11 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Build and package
         run: npm run dist:mac
@@ -133,4 +133,3 @@ jobs:
           aws s3 cp "$DMG" "s3://$R2_BUCKET/versions/$TAG/WinsLab.dmg"       --endpoint-url "$R2_ENDPOINT"
           aws s3 cp "$EXE" "s3://$R2_BUCKET/latest/WinsLab-Setup.exe"        --endpoint-url "$R2_ENDPOINT"
           aws s3 cp "$DMG" "s3://$R2_BUCKET/latest/WinsLab.dmg"              --endpoint-url "$R2_ENDPOINT"
-
