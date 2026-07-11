@@ -4,9 +4,6 @@ on:
   pull_request:
     branches: [main]
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   typecheck:
     runs-on: ubuntu-latest
@@ -15,13 +12,13 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20
           cache: npm
 
       - name: Install ALSA dev headers
         run: sudo apt-get install -y libasound2-dev
 
-      - run: npm ci --force
+      - run: npm ci --legacy-peer-deps
 
       - name: Typecheck
         run: npm run typecheck
@@ -33,13 +30,13 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20
           cache: npm
 
       - name: Install ALSA dev headers
         run: sudo apt-get install -y libasound2-dev
 
-      - run: npm ci --force
+      - run: npm ci --legacy-peer-deps
 
       - name: Unit tests
         run: npm test
@@ -51,10 +48,10 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20
           cache: npm
 
-      - run: npm ci --force
+      - run: npm ci --legacy-peer-deps
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
