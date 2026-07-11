@@ -16,9 +16,10 @@ export function FadeInspector({ cue }: Props) {
         <label>Target cue</label>
         <select value={cue.targetCueId} onChange={e => set({ targetCueId: e.target.value })}>
           <option value="">— select —</option>
-          {otherCues.map(c => (
-            <option key={c.id} value={c.id}>{c.number} {c.name}</option>
-          ))}
+          {otherCues.map(c => {
+            const displayName = c.name.length > 20 ? c.name.slice(0, 17) + '...' : c.name
+            return <option key={c.id} value={c.id}>{c.number} {displayName}</option>
+          })}
         </select>
       </div>
       <div className="field-row">

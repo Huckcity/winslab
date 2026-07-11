@@ -128,6 +128,7 @@
 .field-row select,
 .field-row textarea {
   flex: 1;
+  min-width: 0;
   background: var(--bg-input);
   border: 1px solid var(--border-input);
   border-radius: var(--radius-md);
