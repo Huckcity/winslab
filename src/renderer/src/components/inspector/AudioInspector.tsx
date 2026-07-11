@@ -40,28 +40,30 @@ export function AudioInspector({ cue, tab }: Props) {
   }
 
   if (tab === 'Timing') {
+    const toSeconds = (ms: number) => Math.round(ms / 100) / 10  // 1 decimal
+    const fromSeconds = (s: number) => Math.round(s * 1000)
     return (
       <div>
         <div className="field-row">
-          <label>Start time (ms)</label>
-          <input type="number" min={0} value={cue.startTime}
-            onChange={e => set({ startTime: Number(e.target.value) })} />
+          <label>Start time (s)</label>
+          <input type="number" min={0} step={0.1} value={toSeconds(cue.startTime)}
+            onChange={e => set({ startTime: fromSeconds(Number(e.target.value)) })} />
         </div>
         <div className="field-row">
-          <label>End time (ms)</label>
-          <input type="number" min={0} value={cue.endTime ?? ''}
+          <label>End time (s)</label>
+          <input type="number" min={0} step={0.1} value={cue.endTime != null ? toSeconds(cue.endTime) : ''}
             placeholder="play to end"
-            onChange={e => set({ endTime: e.target.value ? Number(e.target.value) : null })} />
+            onChange={e => set({ endTime: e.target.value ? fromSeconds(Number(e.target.value)) : null })} />
         </div>
         <div className="field-row">
-          <label>Fade in (ms)</label>
-          <input type="number" min={0} value={cue.fadeInDuration}
-            onChange={e => set({ fadeInDuration: Number(e.target.value) })} />
+          <label>Fade in (s)</label>
+          <input type="number" min={0} step={0.1} value={toSeconds(cue.fadeInDuration)}
+            onChange={e => set({ fadeInDuration: fromSeconds(Number(e.target.value)) })} />
         </div>
         <div className="field-row">
-          <label>Fade out (ms)</label>
-          <input type="number" min={0} value={cue.fadeOutDuration}
-            onChange={e => set({ fadeOutDuration: Number(e.target.value) })} />
+          <label>Fade out (s)</label>
+          <input type="number" min={0} step={0.1} value={toSeconds(cue.fadeOutDuration)}
+            onChange={e => set({ fadeOutDuration: fromSeconds(Number(e.target.value)) })} />
         </div>
         <div className="field-row">
           <label>Loop count</label>
