@@ -1,3 +1,10 @@
+## [0.4.5](https://github.com/Huckcity/winslab/compare/v0.4.4...v0.4.5) (2026-07-11)
+
+
+### Bug Fixes
+
+* **toolbar:** use openRecent hook to ensure unsaved-changes guard on recent files ([#5](https://github.com/Huckcity/winslab/issues/5)) ([7fbaa00](https://github.com/Huckcity/winslab/commit/7fbaa00e729945bd1ee0c45e14ca34c80ba07d23))
+
 ## [0.4.4](https://github.com/Huckcity/winslab/compare/v0.4.3...v0.4.4) (2026-07-11)
 
 
