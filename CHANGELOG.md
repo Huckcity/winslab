@@ -1,3 +1,10 @@
+## [0.4.6](https://github.com/Huckcity/winslab/compare/v0.4.5...v0.4.6) (2026-07-11)
+
+
+### Bug Fixes
+
+* **engine:** add configurable timeout to network cue fetch calls ([#4](https://github.com/Huckcity/winslab/issues/4)) ([0826b87](https://github.com/Huckcity/winslab/commit/0826b87c8993db32f339a2e61dc37cf21275eab0))
+
 ## [0.4.5](https://github.com/Huckcity/winslab/compare/v0.4.4...v0.4.5) (2026-07-11)
 
 
