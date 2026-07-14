@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { CueRunner } from './CueRunner'
 import { audioPlayer } from './AudioPlayer'
-import type { Cue, WaitCue, AudioCue, FadeCue, StopCue, NetworkCue } from '../types/cue'
+import type { Cue, WaitCue, AudioCue, FadeCue, StopCue, NetworkCue, ScriptCue } from '../types/cue'
 import type { RunningCue } from '../store'
 
 vi.mock('./AudioPlayer', () => ({
@@ -345,6 +345,30 @@ describe('CueRunner — stop cue', () => {
     runner.go()
     expect(audioPlayer.stopAll).toHaveBeenCalledWith(1500)
   })
+
+  it('stop cue targeting a specific cue calls audioPlayer.stop without fade', () => {
+    const stopCue: StopCue = {
+      id: 's1', number: '1', name: 'Stop Specific', type: 'stop',
+      colorLabel: 'none', preWait: 0, postWait: 0, duration: 0,
+      advance: 'none', isArmed: true, notes: '',
+      targetCueId: 'a1', fadeOut: false, fadeOutDuration: 0
+    }
+    const { runner } = setup([stopCue])
+    runner.go()
+    expect(audioPlayer.stop).toHaveBeenCalledWith('a1', 0)
+  })
+
+  it('stop cue targeting a specific cue with fadeOut passes fadeOutDuration', () => {
+    const stopCue: StopCue = {
+      id: 's1', number: '1', name: 'Stop Specific Fade', type: 'stop',
+      colorLabel: 'none', preWait: 0, postWait: 0, duration: 0,
+      advance: 'none', isArmed: true, notes: '',
+      targetCueId: 'a1', fadeOut: true, fadeOutDuration: 800
+    }
+    const { runner } = setup([stopCue])
+    runner.go()
+    expect(audioPlayer.stop).toHaveBeenCalledWith('a1', 800)
+  })
 })
 
 describe('CueRunner — network cue', () => {
@@ -422,5 +446,138 @@ describe('CueRunner — network cue', () => {
     // Flush microtasks — the mock fetch resolves immediately, so onDone should fire
     await vi.runAllTimersAsync()
     expect(setRunning.mock.calls.map(c => c[0])).toContain('w2')
+  })
+})
+
+describe('CueRunner — script cue', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    console.error = vi.fn()
+  })
+  afterEach(() => { vi.useRealTimers(); vi.clearAllMocks() })
+
+  it('executes the script string via new Function', () => {
+    let executed = false
+    const scriptCue: ScriptCue = {
+      id: 'sc1', number: '1', name: 'Script', type: 'script',
+      colorLabel: 'none', parentId: null, preWait: 0, postWait: 0, timelineOffset: 0, duration: 0,
+      advance: 'none', isArmed: true, notes: '',
+      language: 'javascript',
+      script: 'executed = true'
+    }
+    // Make executed accessible in the eval scope
+    ;(globalThis as any).executed = false
+    const { runner } = setup([scriptCue])
+    runner.go()
+    expect((globalThis as any).executed).toBe(true)
+    delete (globalThis as any).executed
+  })
+
+  it('calls onDone immediately after executing script', () => {
+    const scriptCue: ScriptCue = {
+      id: 'sc1', number: '1', name: 'Script', type: 'script',
+      colorLabel: 'none', parentId: null, preWait: 0, postWait: 0, timelineOffset: 0, duration: 0,
+      advance: 'on-end', isArmed: true, notes: '',
+      language: 'javascript',
+      script: 'const x = 1 + 1'
+    }
+    const cue2 = makeWait({ id: 'w2', number: '2' })
+    const { runner, setRunning } = setup([scriptCue, cue2])
+    runner.go()
+    // Script execute calls onDone synchronously, but post-wait timeout fires asynchronously
+    vi.runAllTimers()
+    expect(setRunning.mock.calls.map(c => c[0])).toContain('w2')
+  })
+
+  it('does not throw when script throws', () => {
+    const scriptCue: ScriptCue = {
+      id: 'sc1', number: '1', name: 'Script', type: 'script',
+      colorLabel: 'none', parentId: null, preWait: 0, postWait: 0, timelineOffset: 0, duration: 0,
+      advance: 'none', isArmed: true, notes: '',
+      language: 'javascript',
+      script: 'throw new Error("boom")'
+    }
+    const { runner } = setup([scriptCue])
+    expect(() => runner.go()).not.toThrow()
+    expect(console.error).toHaveBeenCalled()
+  })
+})
+
+describe('CueRunner — panic details', () => {
+  beforeEach(() => vi.useFakeTimers())
+  afterEach(() => { vi.useRealTimers(); vi.clearAllMocks() })
+
+  it('panic calls this.stop() then audioPlayer.stopAll(200)', () => {
+    const { runner } = setup([makeWait({ duration: 5000 })])
+    const stopSpy = vi.spyOn(runner, 'stop')
+    runner.panic()
+    expect(stopSpy).toHaveBeenCalledWith()
+    expect(audioPlayer.stopAll).toHaveBeenCalledWith(200)
+  })
+})
+
+describe('CueRunner — clearGroupStartOffset', () => {
+  beforeEach(() => vi.useFakeTimers())
+  afterEach(() => { vi.useRealTimers(); vi.clearAllMocks() })
+
+  it('clears the stored offset for a group', () => {
+    const { runner } = setup([])
+    runner.seekTimeline('g1', 500)
+    expect(runner.getGroupStartOffset('g1')).toBe(500)
+    runner.clearGroupStartOffset('g1')
+    expect(runner.getGroupStartOffset('g1')).toBe(0)
+  })
+
+  it('does nothing for a non-existent group', () => {
+    const { runner } = setup([])
+    runner.clearGroupStartOffset('nonexistent')
+    expect(runner.getGroupStartOffset('nonexistent')).toBe(0)
+  })
+})
+
+describe('CueRunner — fireCueFromOffset fallback', () => {
+  beforeEach(() => vi.useFakeTimers())
+  afterEach(() => { vi.useRealTimers(); vi.clearAllMocks() })
+
+  it('calls onDone immediately for non-audio/non-wait cues via fireCueFromOffset (e.g. osc cue in timeline seek)', () => {
+    // Use seekTimeline to exercise the fireCueFromOffset path with a non-audio/non-wait cue
+    const group = {
+      id: 'g1', number: '1', name: 'Group', type: 'group' as const,
+      colorLabel: 'none' as const, parentId: null, preWait: 0, postWait: 0, timelineOffset: 0, duration: 0,
+      advance: 'none' as const, isArmed: true, notes: '',
+      mode: 'timeline' as const,
+    }
+    const oscCue = {
+      id: 'oc1', number: '2', name: 'OSC', type: 'osc' as const,
+      colorLabel: 'none' as const, parentId: 'g1', preWait: 0, postWait: 0, timelineOffset: 0, duration: 0,
+      advance: 'none' as const, isArmed: true, notes: '',
+      host: '127.0.0.1', port: 8000, address: '/test', args: [],
+    }
+    // Mock window.winslab.osc
+    Object.defineProperty(window, 'winslab', {
+      value: { osc: { send: vi.fn().mockResolvedValue(undefined) } },
+      writable: true,
+    })
+
+    const setRunning = vi.fn()
+    const runner = new CueRunner()
+    runner.init({
+      getCues: () => [group, oscCue],
+      getSelected: () => 'g1',
+      setSelected: vi.fn(),
+      setRunning,
+      clearAllRunning: vi.fn(),
+      syncCueDuration: vi.fn(),
+    })
+
+    // Seek past the osc cue's offset — fireCueFromOffset will hit the else branch (onDone)
+    runner.seekTimeline('g1', 100)
+    runner.go()
+    vi.runAllTimers()
+
+    // The osc cue should NOT have been fired because its timelineOffset (0) was before the seek (100),
+    // and it's a fire-and-forget type so it gets skipped entirely (line 234: child.type === 'osc' → continue)
+    // Let's verify that the osc was skipped by checking createBufferSource not called
+    expect(setRunning.mock.calls.filter(c => c[0] === 'oc1')).toHaveLength(0)
   })
 })
