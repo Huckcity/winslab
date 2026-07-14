@@ -359,3 +359,171 @@ describe('store — undo/redo', () => {
     expect(useStore.getState().future).toHaveLength(0)
   })
 })
+
+describe('store — setRunning / clearAllRunning', () => {
+  beforeEach(() => {
+    useStore.setState({ running: new Map(), cues: [], selectedId: null })
+  })
+
+  it('setRunning adds a running cue', () => {
+    useStore.getState().setRunning('c1', { cueId: 'c1', state: 'playing', startedAt: 1000, progress: 0.5 })
+    const running = useStore.getState().running
+    expect(running.get('c1')).toEqual({ cueId: 'c1', state: 'playing', startedAt: 1000, progress: 0.5 })
+  })
+
+  it('setRunning with null removes the running cue', () => {
+    useStore.getState().setRunning('c1', { cueId: 'c1', state: 'playing', startedAt: 1000, progress: 0.5 })
+    useStore.getState().setRunning('c1', null)
+    expect(useStore.getState().running.has('c1')).toBe(false)
+  })
+
+  it('setRunning preserves other running cues when removing one', () => {
+    useStore.getState().setRunning('c1', { cueId: 'c1', state: 'playing', startedAt: 1000, progress: 0 })
+    useStore.getState().setRunning('c2', { cueId: 'c2', state: 'playing', startedAt: 2000, progress: 0 })
+    useStore.getState().setRunning('c1', null)
+    expect(useStore.getState().running.has('c2')).toBe(true)
+    expect(useStore.getState().running.size).toBe(1)
+  })
+
+  it('clearAllRunning removes all running cues', () => {
+    useStore.getState().setRunning('c1', { cueId: 'c1', state: 'playing', startedAt: 1000, progress: 0 })
+    useStore.getState().setRunning('c2', { cueId: 'c2', state: 'playing', startedAt: 2000, progress: 0 })
+    useStore.getState().clearAllRunning()
+    expect(useStore.getState().running.size).toBe(0)
+  })
+
+  it('clearAllRunning on empty map is a no-op', () => {
+    useStore.getState().clearAllRunning()
+    expect(useStore.getState().running.size).toBe(0)
+  })
+})
+
+describe('store — syncCueDuration', () => {
+  beforeEach(() => {
+    useStore.setState({ cues: [] })
+  })
+
+  it('sets duration on the matching cue', () => {
+    useStore.getState().addCue('audio')
+    const id = useStore.getState().cues[0].id
+    useStore.getState().syncCueDuration(id, 5000)
+    expect(useStore.getState().cues[0].duration).toBe(5000)
+  })
+
+  it('does nothing when cue id is not found', () => {
+    useStore.getState().addCue('audio')
+    const originalDuration = useStore.getState().cues[0].duration
+    useStore.getState().syncCueDuration('nonexistent', 5000)
+    expect(useStore.getState().cues[0].duration).toBe(originalDuration)
+  })
+
+  it('returns early when duration is unchanged', () => {
+    useStore.getState().addCue('audio')
+    const id = useStore.getState().cues[0].id
+    useStore.getState().syncCueDuration(id, 0) // initial duration is 0
+    expect(useStore.getState().cues[0].duration).toBe(0)
+  })
+})
+
+describe('store — loadWorkspace', () => {
+  beforeEach(() => {
+    useStore.setState({ cues: [], selectedId: null, past: [], future: [] })
+  })
+
+  it('selects the first top-level cue', () => {
+    useStore.getState().addCue('wait')
+    useStore.getState().addCue('audio')
+    const waitId = useStore.getState().cues[0].id
+    const audioId = useStore.getState().cues[1].id
+
+    useStore.getState().loadWorkspace(
+      useStore.getState().cues.map(c => ({ ...c, parentId: null })),
+      'Test', null
+    )
+    // Should select the first cue (wait)
+    expect(useStore.getState().selectedId).toBe(waitId)
+  })
+
+  it('selects null when cues array is empty', () => {
+    useStore.getState().loadWorkspace([], 'Empty', null)
+    expect(useStore.getState().selectedId).toBeNull()
+  })
+})
+
+describe('store — hooks logic', () => {
+  beforeEach(() => {
+    useStore.setState({ cues: [], selectedId: null, running: new Map() })
+  })
+
+  it('selectedId null causes find to return null (useSelectedCue logic)', () => {
+    const state = useStore.getState()
+    const found = state.cues.find(c => c.id === state.selectedId) ?? null
+    expect(found).toBeNull()
+  })
+
+  it('selectedId matching a cue returns that cue (useSelectedCue logic)', () => {
+    useStore.getState().addCue('wait')
+    const id = useStore.getState().cues[0].id
+    useStore.getState().select(id)
+
+    const state = useStore.getState()
+    const found = state.cues.find(c => c.id === state.selectedId) ?? null
+    expect(found).not.toBeNull()
+    expect(found!.id).toBe(id)
+  })
+
+  it('selectedId pointing to a removed cue returns null (useSelectedCue logic)', () => {
+    useStore.getState().addCue('wait')
+    const id = useStore.getState().cues[0].id
+    useStore.getState().select(id)
+    useStore.getState().removeCue(id)
+
+    const state = useStore.getState()
+    const found = state.cues.find(c => c.id === state.selectedId) ?? null
+    expect(found).toBeNull()
+  })
+
+  it('parent group lookup returns null when cue has no parentId', () => {
+    useStore.getState().addCue('wait')
+    const id = useStore.getState().cues[0].id
+
+    const state = useStore.getState()
+    const cue = state.cues.find(c => c.id === id)
+    const parent = cue?.parentId ? state.cues.find(c => c.id === cue.parentId) : null
+    expect(parent).toBeNull()
+  })
+
+  it('parent group lookup returns null when parent is not a group', () => {
+    useStore.getState().addCue('wait')
+    useStore.getState().addCue('audio', useStore.getState().cues[0].id)
+    const childId = useStore.getState().cues[1].id
+
+    const state = useStore.getState()
+    const cue = state.cues.find(c => c.id === childId)
+    const parent = cue?.parentId ? state.cues.find(c => c.id === cue.parentId) : null
+    const result = parent?.type === 'group' ? parent : null
+    expect(result).toBeNull()
+  })
+
+  it('parent group lookup returns the group cue for a child', () => {
+    useStore.getState().addCue('group')
+    const groupId = useStore.getState().cues[0].id
+    useStore.getState().addCue('wait', groupId)
+    const childId = useStore.getState().cues[1].id
+
+    const state = useStore.getState()
+    const cue = state.cues.find(c => c.id === childId)
+    const parent = cue?.parentId ? state.cues.find(c => c.id === cue.parentId) : null
+    const result = parent?.type === 'group' ? parent : null
+    expect(result).not.toBeNull()
+    expect(result!.id).toBe(groupId)
+    expect(result!.type).toBe('group')
+  })
+
+  it('parent group lookup returns null for non-existent cue id', () => {
+    const state = useStore.getState()
+    const cue = state.cues.find(c => c.id === 'nonexistent')
+    const parent = cue?.parentId ? state.cues.find(c => c.id === cue.parentId) : null
+    expect(parent).toBeNull()
+  })
+})
