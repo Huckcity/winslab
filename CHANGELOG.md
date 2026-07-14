@@ -1,3 +1,10 @@
+# [0.5.0](https://github.com/Huckcity/winslab/compare/v0.4.7...v0.5.0) (2026-07-14)
+
+
+### Features
+
+* **audio:** add real-time adjustable playback rate, trim, and pan controls ([#38](https://github.com/Huckcity/winslab/issues/38)) ([beae2c7](https://github.com/Huckcity/winslab/commit/beae2c709bdf7d28d37747d60682c300c24bb504))
+
 ## [0.4.7](https://github.com/Huckcity/winslab/compare/v0.4.6...v0.4.7) (2026-07-11)
 
 
