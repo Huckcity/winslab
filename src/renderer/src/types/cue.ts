@@ -32,6 +32,8 @@ export interface AudioCue extends CueBase {
   fadeOutDuration: number
   outputs: AudioOutput[]
   loopCount: number
+  playbackRate: number
+  trim: number
 }
 
 export type MidiMessageKind =

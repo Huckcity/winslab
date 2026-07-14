@@ -9,6 +9,7 @@ export interface AudioProgress {
 interface ActiveNode {
   source: AudioBufferSourceNode
   gain: GainNode
+  trimGain: GainNode
   panner: StereoPannerNode
   startContextTime: number  // AudioContext.currentTime when source.start() was called
   startOffset: number       // offset into file in seconds (cue.startTime / 1000)
@@ -55,6 +56,7 @@ class AudioPlayer {
 
     const source = ctx.createBufferSource()
     source.buffer = buffer
+    source.playbackRate.setValueAtTime(cue.playbackRate, ctx.currentTime)
 
     const gain = ctx.createGain()
     gain.gain.setValueAtTime(cue.fadeInDuration > 0 ? 0 : output.volume, ctx.currentTime)
@@ -62,10 +64,13 @@ class AudioPlayer {
       gain.gain.linearRampToValueAtTime(output.volume, ctx.currentTime + cue.fadeInDuration / 1000)
     }
 
+    const trimGain = ctx.createGain()
+    trimGain.gain.setValueAtTime(cue.trim, ctx.currentTime)
+
     const panner = ctx.createStereoPanner()
     panner.pan.setValueAtTime(output.pan, ctx.currentTime)
 
-    source.connect(gain).connect(panner).connect(ctx.destination)
+    source.connect(gain).connect(trimGain).connect(panner).connect(ctx.destination)
 
     const startOffset = cue.startTime / 1000
     const playDuration = cue.endTime != null ? (cue.endTime - cue.startTime) / 1000 : undefined
@@ -75,7 +80,7 @@ class AudioPlayer {
     source.start(0, startOffset, playDuration)
 
     const node: ActiveNode = {
-      source, gain, panner,
+      source, gain, trimGain, panner,
       startContextTime,
       startOffset,
       bufferDuration: buffer.duration,
@@ -165,6 +170,36 @@ class AudioPlayer {
     } else {
       pannerPan.cancelScheduledValues(ctx.currentTime)
       pannerPan.setValueAtTime(pan, ctx.currentTime)
+    }
+  }
+
+  setPlaybackRate(cueId: string, rate: number, durationMs = 0): void {
+    const node = this.active.get(cueId)
+    if (!node) return
+    const ctx = this.getCtx()
+    const playbackRate = node.source.playbackRate
+    if (durationMs > 0) {
+      playbackRate.cancelScheduledValues(ctx.currentTime)
+      playbackRate.setValueAtTime(playbackRate.value, ctx.currentTime)
+      playbackRate.linearRampToValueAtTime(rate, ctx.currentTime + durationMs / 1000)
+    } else {
+      playbackRate.cancelScheduledValues(ctx.currentTime)
+      playbackRate.setValueAtTime(rate, ctx.currentTime)
+    }
+  }
+
+  setTrim(cueId: string, trim: number, durationMs = 0): void {
+    const node = this.active.get(cueId)
+    if (!node) return
+    const ctx = this.getCtx()
+    const trimGain = node.trimGain.gain
+    if (durationMs > 0) {
+      trimGain.cancelScheduledValues(ctx.currentTime)
+      trimGain.setValueAtTime(trimGain.value, ctx.currentTime)
+      trimGain.linearRampToValueAtTime(trim, ctx.currentTime + durationMs / 1000)
+    } else {
+      trimGain.cancelScheduledValues(ctx.currentTime)
+      trimGain.setValueAtTime(trim, ctx.currentTime)
     }
   }
 
