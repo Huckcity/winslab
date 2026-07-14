@@ -85,6 +85,29 @@ export function AudioInspector({ cue, tab }: Props) {
           onClick={pickFile} />
         <button onClick={pickFile} disabled={loading} className="inspector-btn">Browse</button>
       </div>
+      <div className="field-section-title">Playback</div>
+      <div className="field-row">
+        <label>Rate</label>
+        <input type="range" min={0.25} max={4} step={0.05} value={cue.playbackRate}
+          onChange={e => {
+            const rate = Number(e.target.value)
+            set({ playbackRate: rate })
+            audioPlayer.setPlaybackRate(cue.id, rate)
+          }}
+          style={{ flex: 1, accentColor: 'var(--accent-blue)' }} />
+        <span className="inspector-readout">{cue.playbackRate.toFixed(2)}x</span>
+      </div>
+      <div className="field-row">
+        <label>Trim</label>
+        <input type="range" min={0} max={2} step={0.01} value={cue.trim}
+          onChange={e => {
+            const trim = Number(e.target.value)
+            set({ trim })
+            audioPlayer.setTrim(cue.id, trim)
+          }}
+          style={{ flex: 1, accentColor: 'var(--accent-blue)' }} />
+        <span className="inspector-readout">{Math.round(cue.trim * 100)}%</span>
+      </div>
       <div className="field-section-title">Output</div>
       <div className="field-row">
         <label>Volume</label>

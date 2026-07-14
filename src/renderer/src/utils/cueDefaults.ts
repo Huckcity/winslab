@@ -36,7 +36,9 @@ export function createCue(type: CueType): Cue {
         fadeInDuration: 0,
         fadeOutDuration: 0,
         outputs: [{ deviceId: 'default', channelPair: [1, 2], volume: 1, pan: 0 }],
-        loopCount: 0
+        loopCount: 0,
+        playbackRate: 1.0,
+        trim: 1.0
       } satisfies AudioCue
     case 'midi':
       return {

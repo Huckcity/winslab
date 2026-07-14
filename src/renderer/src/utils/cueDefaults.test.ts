@@ -32,6 +32,8 @@ describe('createCue', () => {
     expect(cue.outputs).toHaveLength(1)
     expect(cue.outputs[0].volume).toBe(1)
     expect(cue.outputs[0].pan).toBe(0)
+    expect(cue.playbackRate).toBe(1.0)
+    expect(cue.trim).toBe(1.0)
   })
 
   it('osc cue defaults to localhost port 53000', () => {

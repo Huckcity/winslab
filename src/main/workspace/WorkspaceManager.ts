@@ -13,6 +13,10 @@ function migrateCue(cue: Cue & Record<string, unknown>): Cue {
   if (cue.isArmed === undefined) cue.isArmed = true
   if (cue.notes === undefined) cue.notes = ''
   if (cue.parentId === undefined) cue.parentId = null
+  if (cue.type === 'audio') {
+    if (cue.playbackRate === undefined) cue.playbackRate = 1.0
+    if (cue.trim === undefined) cue.trim = 1.0
+  }
   delete cue.autoContinue
   delete cue.autoFollow
   return cue
