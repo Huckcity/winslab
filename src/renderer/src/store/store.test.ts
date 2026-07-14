@@ -360,6 +360,67 @@ describe('store — undo/redo', () => {
   })
 })
 
+describe('store — addAudioCuesFromFiles', () => {
+  beforeEach(() => useStore.setState({ cues: [], selectedId: null, past: [], future: [] }))
+
+  it('appends audio cues from file list at the end when no afterId', () => {
+    useStore.getState().addAudioCuesFromFiles([
+      { filePath: '/a.wav', name: 'Sound A' },
+      { filePath: '/b.wav', name: 'Sound B' }
+    ])
+    const cues = useStore.getState().cues
+    expect(cues).toHaveLength(2)
+    expect(cues[0].type).toBe('audio')
+    expect(cues[0].filePath).toBe('/a.wav')
+    expect(cues[0].name).toBe('Sound A')
+    expect(cues[1].filePath).toBe('/b.wav')
+    expect(cues[1].name).toBe('Sound B')
+  })
+
+  it('selects the last added audio cue', () => {
+    useStore.getState().addAudioCuesFromFiles([
+      { filePath: '/a.wav', name: 'A' },
+      { filePath: '/b.wav', name: 'B' }
+    ])
+    const cues = useStore.getState().cues
+    expect(useStore.getState().selectedId).toBe(cues[1].id)
+  })
+
+  it('inserts after a specific cue when afterId is given', () => {
+    useStore.getState().addCue('wait')
+    const waitId = useStore.getState().cues[0].id
+    useStore.getState().addAudioCuesFromFiles([{ filePath: '/a.wav', name: 'A' }], waitId)
+    const cues = useStore.getState().cues
+    expect(cues).toHaveLength(2)
+    expect(cues[0].type).toBe('wait')
+    expect(cues[1].type).toBe('audio')
+  })
+
+  it('inserts as child when afterId points to a group header', () => {
+    useStore.getState().addCue('group')
+    const groupId = useStore.getState().cues[0].id
+    useStore.getState().addAudioCuesFromFiles([{ filePath: '/a.wav', name: 'A' }], groupId)
+    const cues = useStore.getState().cues
+    expect(cues[1].parentId).toBe(groupId)
+  })
+
+  it('inherits parentId when afterId points to a group child', () => {
+    useStore.getState().addCue('group')
+    const groupId = useStore.getState().cues[0].id
+    useStore.getState().addCue('wait', groupId)
+    const childId = useStore.getState().cues[1].id
+    useStore.getState().addAudioCuesFromFiles([{ filePath: '/a.wav', name: 'A' }], childId)
+    const cues = useStore.getState().cues
+    expect(cues[2].parentId).toBe(groupId)
+  })
+
+  it('marks workspace dirty', () => {
+    useStore.setState({ isDirty: false })
+    useStore.getState().addAudioCuesFromFiles([{ filePath: '/a.wav', name: 'A' }])
+    expect(useStore.getState().isDirty).toBe(true)
+  })
+})
+
 describe('store — setRunning / clearAllRunning', () => {
   beforeEach(() => {
     useStore.setState({ running: new Map(), cues: [], selectedId: null })
