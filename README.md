@@ -228,11 +228,7 @@ GitHub Actions workflows in `.github/workflows/`:
 
 See `CLAUDE.md` for detailed development guidelines.
 
-## License
-
-© 2026 Huckcity. All rights reserved.
-
 ## Support
 
 - **Issues**: [GitHub Issues](https://github.com/Huckcity/winslab/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/Huckcity/winslab/discussions)
+- **Feedback**: The fastest way to shape Winslab is to file an issue with your use case — "I run sound for X and need Y" directly drives the roadmap.
