@@ -1,3 +1,10 @@
+## [0.5.1](https://github.com/Huckcity/winslab/compare/v0.5.0...v0.5.1) (2026-09-04)
+
+
+### Bug Fixes
+
+* **website:** point OG tags at live GitHub Pages URL (apex domain not registered) ([#47](https://github.com/Huckcity/winslab/issues/47)) ([106f642](https://github.com/Huckcity/winslab/commit/106f64212822ae042a526f21dac8ee36934cbc2c))
+
 # [0.5.0](https://github.com/Huckcity/winslab/compare/v0.4.7...v0.5.0) (2026-07-14)
 
 
