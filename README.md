@@ -2,7 +2,7 @@
 
 A cross-platform **QLab alternative** for Windows and macOS — professional show-control software for managing audio, MIDI, OSC, and network cues in live performance and broadcast environments.
 
-Built with Electron, React, TypeScript, and Zustand.
+Built with Electron, React, TypeScript, and Zustand. Licensed under [MIT](./LICENSE).
 
 ## Features
 
